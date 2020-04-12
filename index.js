@@ -222,24 +222,82 @@ app.post('/DenOfArtRegister',(request,response,next)=> {
     var email = post_data.email;
     var password = post_data.password;  
     var mobile = post_data.phonenumber; 
+    var isExist = false;
+
     var insertJson = {  
         'UserName':name,  
         'Email': email,  
         'Password': password,
         'PhoneNumber':mobile
     };
-    console.log(insertJson);
+    //console.log(insertJson);
     // Get a reference to the database service
     var db = firebase.database();
     var rootRef = db.ref();
-
+    
+    /*
     var usersRef = rootRef.child("DenOfArtUsers");
     var userRef = usersRef.push();
     console.log('user key', userRef.key);
     usersRef.push(userRef.key).set(insertJson);
-
+    console.log("User Registeration Successful..");
     console.log(insertJson);
     response.send(insertJson);
+    */
+    var dbRef = db.ref('DenOfArtUsers');
+    dbRef.orderByChild('UserName').equalTo(name).once('value', (snapshot)=>{
+        if(snapshot != null && snapshot != ''){
+            if(snapshot.exists){
+                var vals = snapshot.val();
+                if(vals!=null && vals != ''){
+                    var keys = Object.keys(vals);
+                    for(var i=0; i<keys.length; i++){
+                        var k = keys[i];
+                        var username = vals[k].UserName;
+                        
+                        if(name == username){
+                            isExist = true;
+                            console.log("Username was exit!");
+                        }
+                    }
+                }else{
+                    isExist = false;
+                    console.log("Username not found, can add");
+                    var usersRef = rootRef.child("DenOfArtUsers");
+                    var userRef = usersRef.push();
+                    console.log('user key', userRef.key);
+                    dbRef.push(userRef.key).set(insertJson);
+                    console.log(insertJson);
+                    response.send(insertJson);
+                }
+            }else{
+                isExist = false;
+                console.log("DenOfArtUsers not found(NOT EXIST)!");
+                var usersRef = rootRef.child("DenOfArtUsers");
+                var userRef = usersRef.push();
+                console.log('user key', userRef.key);
+                dbRef.push(userRef.key).set(insertJson);
+                console.log(insertJson);
+                response.send(insertJson);
+            }
+        }else{
+            isExist = false;
+            console.log("DenOfArtUsers not found(NULL)!");
+            var usersRef = rootRef.child("DenOfArtUsers");
+            var userRef = usersRef.push();
+            console.log('user key', userRef.key);
+            dbRef.push(userRef.key).set(insertJson);
+            console.log(insertJson);
+            response.send(insertJson);
+        }
+
+        if (isExist){
+            console.log("FAIL");
+            response.send("FAIL");
+        }
+    });
+    
+    
     /*
     var dbRef = db.ref('DenOfArtUsers');
     dbRef.once('value', (snapshot)=>{
@@ -279,7 +337,7 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
     var dbRef = db.ref('DenOfArtUsers');
     var existUser = false;
 
-    dbRef.orderByChild('UserName').equalTo(loginname).on('value', (snapshot)=>{
+    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
         var keys = Object.keys(vals);
         var jsonObj = {data:[]};
@@ -294,13 +352,51 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
                 jsonObj.data.push(vals[k]);
             }
         }
+        if (!existUser){
+            console.log(existUser);
+            response.send(existUser);
+        }else{
+            console.log(existUser);
+            response.send(existUser);
+        }
     });
+});
 
-    if (!existUser){
-        console.log(existUser);
-        response.send(existUser);
-    }else{
-        console.log(existUser);
-        response.send(existUser);
-    }
+app.post('/DenOfArtChangePassword',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Change Password");
+    var post_data = request.body;  
+    var loginname = post_data.username;
+    var loginpassword = post_data.password;
+    var newpassword = post_data.newpassword;
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtUsers');
+    var isDone = false;
+
+    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        var keys = Object.keys(vals);
+        for(var i=0; i<keys.length; i++){
+            var k = keys[i];
+            var password = vals[k].Password;
+            
+            if(loginpassword == password){
+                var dataObj = vals[k]
+                console.log('user key', k);
+                console.log('newpassword', newpassword);
+                var dataRef = dbRef.child(k);
+                dataRef.update({
+                    "Password": newpassword
+                });
+                if(!isDone){
+                    isDone = true;
+                    break;
+                }
+            }
+        }
+        console.log(isDone);
+        response.send(isDone);
+    });
+    
 });
