@@ -179,7 +179,7 @@ app.post('/firebase',(request,response,next)=> {
     
     var db = firebase.database();
     var dbRef = db.ref('MapTracking');
-    dbRef.orderByChild('LoginName').equalTo('suwit').once('value', (snapshot)=>{
+    dbRef.orderByChild('LoginName').equalTo('suwit').on('value', (snapshot)=>{
         var vals = snapshot.val();
         var keys = Object.keys(vals);
         var jsonObj = {data:[]};
