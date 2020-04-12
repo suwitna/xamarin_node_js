@@ -16,6 +16,20 @@ admin.initializeApp({
   databaseURL: "https://maplocation-4b2a1.firebaseio.com"
 });
 */
+// Set the configuration for your app
+// TODO: Replace with your project's config object
+var config = {
+    apiKey: "AIzaSyB5qUVavHltwYOsmxgShp-wQv2PUge5Ny4",
+    authDomain: "maplocation-4b2a1.firebaseapp.com",
+    databaseURL: "https://maplocation-4b2a1.firebaseio.com",
+    //projectId: "maplocation-4b2a1",
+    storageBucket: "maplocation-4b2a1.appspot.com"
+    //messagingSenderId: "141744972127"
+};
+
+if(!firebase.app.length){
+    firebase.initializeApp(config);
+}
 
 //Password Utils  
 //Create Function to Random Salt  
@@ -160,23 +174,7 @@ app.post('/firebase',(request,response,next)=> {
     var post_data = request.body;  
   
     var PostalCode = post_data.PostalCode;  
-
-    // Set the configuration for your app
-  // TODO: Replace with your project's config object
-    var config = {
-        apiKey: "AIzaSyB5qUVavHltwYOsmxgShp-wQv2PUge5Ny4",
-        authDomain: "maplocation-4b2a1.firebaseapp.com",
-        databaseURL: "https://maplocation-4b2a1.firebaseio.com",
-        //projectId: "maplocation-4b2a1",
-        storageBucket: "maplocation-4b2a1.appspot.com"
-        //messagingSenderId: "141744972127"
-    };
-
-
-    firebase.initializeApp(config);
-
     // Get a reference to the database service
-    
     var db = firebase.database();
     var dbRef = db.ref('MapTracking');
     dbRef.orderByChild('LoginName').equalTo('suwit').on('value', (snapshot)=>{
