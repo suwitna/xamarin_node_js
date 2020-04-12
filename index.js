@@ -16,7 +16,6 @@ admin.initializeApp({
   databaseURL: "https://maplocation-4b2a1.firebaseio.com"
 });
 */
-
 //Password Utils  
 //Create Function to Random Salt  
   
@@ -68,13 +67,13 @@ if(err)
 else  
 {  
     //Start Web Server  
-    app.listen(port,()=> {console.log('Connected to MongoDb server, Webservice running on on port 3000');  
+    app.listen(port,()=> {console.log('Connected to MongoDb server, Webservice running on on port '+ port);  
 });  
 }  
 // Set the configuration for your app
 // TODO: Replace with your project's config object
 var config = {
-    apiKey: "AIzaSyB5qUVavHltwYOsmxgShp-wQv2PUge5Ny4",
+    apiKey: "AIzaSyAmg4vqvEq_Yx89rMemZGOO9R1p4nL6mOw",
     authDomain: "maplocation-4b2a1.firebaseapp.com",
     databaseURL: "https://maplocation-4b2a1.firebaseio.com",
     //projectId: "maplocation-4b2a1",
@@ -130,7 +129,8 @@ app.post('/login',(request,response,next)=>
 
     var email = post_data.email;  
     var userPassword = post_data.password;
-    
+    console.log(email); 
+    console.log(userPassword); 
     /*
     var db = client.db('ahsannodejs');  
     
@@ -218,22 +218,89 @@ app.post('/firebase',(request,response,next)=> {
 app.post('/DenOfArtRegister',(request,response,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Register");
     var post_data = request.body;  
-    var name = post_data.UserName;  
-    var email = post_data.Email;
-    var password = post_data.Password;  
-    var mobile = post_data.PhoneNumber;   
-
+    var name = post_data.username;  
+    var email = post_data.email;
+    var password = post_data.password;  
+    var mobile = post_data.phonenumber; 
     var insertJson = {  
         'UserName':name,  
         'Email': email,  
         'Password': password,
         'PhoneNumber':mobile
     };
-
+    console.log(insertJson);
     // Get a reference to the database service
     var db = firebase.database();
-    var dbRef = db.ref.child('DenOfArtUsers');
-    dbRef.set(insertJson);
-    console.log('User Registeration Successful..');  
-    response.json('User Registeration Successful..');  
+    var rootRef = db.ref();
+
+    var usersRef = rootRef.child("DenOfArtUsers");
+    var userRef = usersRef.push();
+    console.log('user key', userRef.key);
+    usersRef.push(userRef.key).set(insertJson);
+
+    console.log(insertJson);
+    response.send(insertJson);
+    /*
+    var dbRef = db.ref('DenOfArtUsers');
+    dbRef.once('value', (snapshot)=>{
+        if(snapshot.exists()){
+            console.log("DenOfArtUsers is exist");
+            var userRef = dbRef.push();
+            console.log('user key', userRef.key);
+            dbRef.push(userRef.key).set(insertJson);
+        }else{
+            console.log("DenOfArtUsers is not exist!");
+            var usersRef = rootRef.child("DenOfArtUsers");
+            var userRef = usersRef.push();
+            console.log('user key', userRef.key);
+            dbRef.push(userRef.key).set(insertJson);
+        }
+
+        //dbRef.set(insertJson);
+        if (data ==''){
+            console.log('FAIL');
+            response.send('FAIL');
+        }else{
+            console.log(insertJson);
+            response.send(insertJson);
+        }
+    });
+    */
+});
+
+app.post('/DenOfArtLogin',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art User Login");
+    var post_data = request.body;  
+  
+    var loginname = post_data.username;
+    var loginpassword = post_data.password;  
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtUsers');
+    var existUser = false;
+
+    dbRef.orderByChild('UserName').equalTo(loginname).on('value', (snapshot)=>{
+        var vals = snapshot.val();
+        var keys = Object.keys(vals);
+        var jsonObj = {data:[]};
+        var obj = {};
+        for(var i=0; i<keys.length; i++){
+            var k = keys[i];
+            var password = vals[k].Password;
+            
+            if(loginpassword == password){
+                existUser = true;
+                obj[k] = vals[k];
+                jsonObj.data.push(vals[k]);
+            }
+        }
+    });
+
+    if (!existUser){
+        console.log(existUser);
+        response.send(existUser);
+    }else{
+        console.log(existUser);
+        response.send(existUser);
+    }
 });
