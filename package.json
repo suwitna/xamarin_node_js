@@ -1,12 +1,10 @@
 {
-  "scripts": {
-    "start": "node index.js"
-  },
   "name": "xamarin_node_js",
   "version": "1.0.0",
   "description": "Xamarin meet Node JS",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Suwit Nac",
