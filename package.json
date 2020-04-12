@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "name": "xamarin_node_js",
   "version": "1.0.0",
   "description": "Xamarin meet Node JS",
