@@ -16,20 +16,6 @@ admin.initializeApp({
   databaseURL: "https://maplocation-4b2a1.firebaseio.com"
 });
 */
-// Set the configuration for your app
-// TODO: Replace with your project's config object
-var config = {
-    apiKey: "AIzaSyB5qUVavHltwYOsmxgShp-wQv2PUge5Ny4",
-    authDomain: "maplocation-4b2a1.firebaseapp.com",
-    databaseURL: "https://maplocation-4b2a1.firebaseio.com",
-    //projectId: "maplocation-4b2a1",
-    storageBucket: "maplocation-4b2a1.appspot.com"
-    //messagingSenderId: "141744972127"
-};
-
-if(!firebase.app.length){
-    firebase.initializeApp(config);
-}
 
 //Password Utils  
 //Create Function to Random Salt  
@@ -75,96 +61,108 @@ var err = false;
 var port = process.env.PORT || 3000;
 //MongoClient.connect(url,{useNewUrlParser:true, useUnifiedTopology:true},function(err, client)  
 //{  
-    if(err)  
-    {  
-        console.log('Unable to connect to MongoDB server.Error',err);  
-    }  
-    else  
-    {  
-        //Start Web Server  
-        app.listen(port,()=> {console.log('Connected to MongoDb server, Webservice running on on port 3000');  
+if(err)  
+{  
+    console.log('Unable to connect to MongoDB server.Error',err);  
+}  
+else  
+{  
+    //Start Web Server  
+    app.listen(port,()=> {console.log('Connected to MongoDb server, Webservice running on on port 3000');  
+});  
+}  
+// Set the configuration for your app
+// TODO: Replace with your project's config object
+var config = {
+    apiKey: "AIzaSyB5qUVavHltwYOsmxgShp-wQv2PUge5Ny4",
+    authDomain: "maplocation-4b2a1.firebaseapp.com",
+    databaseURL: "https://maplocation-4b2a1.firebaseio.com",
+    //projectId: "maplocation-4b2a1",
+    storageBucket: "maplocation-4b2a1.appspot.com"
+    //messagingSenderId: "141744972127"
+};
+
+firebase.initializeApp(config);
+
+//Register   
+app.post('/register',(request,response,next)=>  
+{  
+    var post_data = request.body;  
+
+    var plain_password = post_data.password;  
+    var hash_data = saltHashPassword(plain_password);  
+
+    var password = hash_data.passwordHash;  
+
+    var name = post_data.name;  
+    var email = post_data.email;  
+
+    var insertJson = {  
+        'name':name,  
+        'email': email,  
+        'password': password
+    }; 
+    console.log('User Registeration Successful..');  
+    response.json('User Registeration Successful..');  
+    /*
+    var db = client.db('ahsannodejs');  
+
+    //Check Already Exist Email  
+    db.collection('user').find({'email':email}).count(function(err,number){  
+        if(number != 0){  
+            console.log('User Email already exist!');  
+            response.json('User Email already exist!');  
+        }else{  
+            //Insert data  
+            db.collection('user').insertOne(insertJson,function(err,res){  
+                console.log('User Registeration Successful..');  
+                response.json('User Registeration Successful..');  
+            });  
+        }  
     });  
-    }  
+    */
+});  
   
-    //Register   
-    app.post('/register',(request,response,next)=>  
-    {  
-        var post_data = request.body;  
-  
-        var plain_password = post_data.password;  
-        var hash_data = saltHashPassword(plain_password);  
-  
-        var password = hash_data.passwordHash;  
-  
-        var name = post_data.name;  
-        var email = post_data.email;  
-  
-        var insertJson = {  
-            'name':name,  
-            'email': email,  
-            'password': password
-        }; 
-        console.log('User Registeration Successful..');  
-        response.json('User Registeration Successful..');  
-        /*
-        var db = client.db('ahsannodejs');  
-  
-        //Check Already Exist Email  
-        db.collection('user').find({'email':email}).count(function(err,number){  
-            if(number != 0){  
-                console.log('User Email already exist!');  
-                response.json('User Email already exist!');  
-            }else{  
-                //Insert data  
-                db.collection('user').insertOne(insertJson,function(err,res){  
-                    console.log('User Registeration Successful..');  
-                    response.json('User Registeration Successful..');  
-                });  
-            }  
-        });  
-        */
-    });  
-  
-    //Login  
-    app.post('/login',(request,response,next)=>  
-    {  
-        var post_data = request.body;  
-  
-        var email = post_data.email;  
-        var userPassword = post_data.password;
-		
-		/*
-        var db = client.db('ahsannodejs');  
-        
-        //Check Already Exist Email  
-        db.collection('user').find({'email':email}).count(function(err,number){  
-            if(number == 0){  
-                console.log('User Email not exist!');  
-                response.json('User Email not exist!');  
-            }else{  
-                //Insert data  
-                db.collection('user').findOne({'email':email},function(err,user)  
+//Login  
+app.post('/login',(request,response,next)=>  
+{  
+    var post_data = request.body;  
+
+    var email = post_data.email;  
+    var userPassword = post_data.password;
+    
+    /*
+    var db = client.db('ahsannodejs');  
+    
+    //Check Already Exist Email  
+    db.collection('user').find({'email':email}).count(function(err,number){  
+        if(number == 0){  
+            console.log('User Email not exist!');  
+            response.json('User Email not exist!');  
+        }else{  
+            //Insert data  
+            db.collection('user').findOne({'email':email},function(err,user)  
+            {  
+                var salt = user.salt;  
+                var hashed_password = checkHashPassword(userPassword,salt).passwordHash; //Hash Password with Salt  
+                var encrypted_password = user.password; //Get Password from user  
+                if(hashed_password == encrypted_password)  
                 {  
-                    var salt = user.salt;  
-                    var hashed_password = checkHashPassword(userPassword,salt).passwordHash; //Hash Password with Salt  
-                    var encrypted_password = user.password; //Get Password from user  
-                    if(hashed_password == encrypted_password)  
-                    {  
-                        console.log('User Login Successful..');  
-                        response.json('User Login Successful..');  
-                    }else  
-                    {  
-                        console.log('Login Failed Wrong Password..');  
-                        response.json('Login Failed Wrong Password..');  
-                    }  
-                });  
-            }  
-        });  
-        */
-       console.log('User Login Successful..');  
-       response.json('User Login Successful..');  
+                    console.log('User Login Successful..');  
+                    response.json('User Login Successful..');  
+                }else  
+                {  
+                    console.log('Login Failed Wrong Password..');  
+                    response.json('Login Failed Wrong Password..');  
+                }  
+            });  
+        }  
     });  
-  
+    */
+    console.log('User Login Successful..');  
+    response.json('User Login Successful..');  
+});  
+
 //}
 //);  
 
