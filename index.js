@@ -58,7 +58,7 @@ var MongoClient = mongodb.MongoClient;
 //Connection URL  
 var url = 'mongodb://localhost:27017' //27017 is default port  
 var err = false;
-
+var port = process.env.PORT || 3000;
 //MongoClient.connect(url,{useNewUrlParser:true, useUnifiedTopology:true},function(err, client)  
 //{  
     if(err)  
@@ -68,7 +68,7 @@ var err = false;
     else  
     {  
         //Start Web Server  
-        app.listen(3000,()=> {console.log('Connected to MongoDb server, Webservice running on on port 3000');  
+        app.listen(port,()=> {console.log('Connected to MongoDb server, Webservice running on on port 3000');  
     });  
     }  
   
