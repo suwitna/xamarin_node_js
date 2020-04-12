@@ -4,9 +4,19 @@ var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;  
 var crypto = require('crypto');  
 var express = require('express');  
-var bodyParser = require('body-parser');  
-  
-  
+var bodyParser = require('body-parser');
+var firebase = require('firebase');
+/*
+var admin = require("firebase-admin");
+
+var serviceAccount = require("path/to/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://maplocation-4b2a1.firebaseio.com"
+});
+*/
+
 //Password Utils  
 //Create Function to Random Salt  
   
@@ -71,20 +81,14 @@ var err = false;
         var hash_data = saltHashPassword(plain_password);  
   
         var password = hash_data.passwordHash;  
-        var salt = hash_data.salt;  
   
-        var firstname = post_data.firstname;  
-        var lastname = post_data.lastname;  
-        var mobile = post_data.mobile;  
+        var name = post_data.name;  
         var email = post_data.email;  
   
         var insertJson = {  
-            'firstname':firstname,  
-            'lastname' : lastname,  
+            'name':name,  
             'email': email,  
-            'mobile' : mobile,  
-            'password': password,  
-            'salt': salt  
+            'password': password
         }; 
         console.log('User Registeration Successful..');  
         response.json('User Registeration Successful..');  
@@ -113,10 +117,11 @@ var err = false;
         var post_data = request.body;  
   
         var email = post_data.email;  
-        var userPassword = post_data.password;  
-  
+        var userPassword = post_data.password;
+		
+		/*
         var db = client.db('ahsannodejs');  
-        /*
+        
         //Check Already Exist Email  
         db.collection('user').find({'email':email}).count(function(err,number){  
             if(number == 0){  
@@ -142,9 +147,74 @@ var err = false;
             }  
         });  
         */
-       console.log('Login Failed Wrong Password..');  
-       response.json('Login Failed Wrong Password..');  
+       console.log('User Login Successful..');  
+       response.json('User Login Successful..');  
     });  
   
 //}
 //);  
+
+
+app.post('/firebase',(request,response,next)=> { 
+    console.log("HTTP Get Request :: Firebase");
+    var post_data = request.body;  
+  
+    var PostalCode = post_data.PostalCode;  
+
+    // Set the configuration for your app
+  // TODO: Replace with your project's config object
+    var config = {
+        apiKey: "AIzaSyB5qUVavHltwYOsmxgShp-wQv2PUge5Ny4",
+        authDomain: "maplocation-4b2a1.firebaseapp.com",
+        databaseURL: "https://maplocation-4b2a1.firebaseio.com",
+        //projectId: "maplocation-4b2a1",
+        storageBucket: "maplocation-4b2a1.appspot.com"
+        //messagingSenderId: "141744972127"
+    };
+
+
+    firebase.initializeApp(config);
+
+    // Get a reference to the database service
+    
+    var db = firebase.database();
+    var dbRef = db.ref('MapTracking');
+    dbRef.orderByChild('LoginName').equalTo('suwit').once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        var keys = Object.keys(vals);
+        var jsonObj = {data:[]};
+        var obj = {};
+        for(var i=0; i<keys.length; i++){
+            var k = keys[i];
+            var createDate = vals[k].CreateDate;
+            
+            if(createDate != null && createDate != ''){
+                var res = createDate.match('2020-04-01');
+                if (res != null && res != ''){
+                    console.log('res>>>'+ res);
+                    obj[k] = vals[k];
+                    jsonObj.data.push(vals[k]);
+                }
+                
+            }
+        }
+        response.json(jsonObj);
+        //console.log(snapshot.val());
+        //response.json(snapshot.val());
+    });
+    /*
+    var ref = firebase.database().ref("MapTracking");
+    
+    //Attach an asynchronous callback to read the data
+    ref.on("value",
+        function(snapshot) {
+            console.log(snapshot.val());
+            response.json(snapshot.val());
+            ref.off("value");
+        }, 
+        function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
+            response.send("The read failed: " + errorObject.code);
+        });
+       */ 
+});
