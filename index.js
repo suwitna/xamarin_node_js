@@ -214,3 +214,31 @@ app.post('/firebase',(request,response,next)=> {
         });
        */ 
 });
+
+app.post('/DenOfArtRegister',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art User Register");
+    var post_data = request.body;  
+
+    var plain_password = post_data.Password;  
+    var hash_data = saltHashPassword(plain_password);  
+
+    var password = hash_data.passwordHash;  
+
+    var name = post_data.UserName;  
+    var email = post_data.Email;
+    var mobile = post_data.PhoneNumber;   
+
+    var insertJson = {  
+        'UserName':name,  
+        'Email': email,  
+        'Password': password,
+        'PhoneNumber':mobile
+    };
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtUsers');
+    dbRef.set(insertJson);
+    console.log('User Registeration Successful..');  
+    response.json('User Registeration Successful..');  
+});
