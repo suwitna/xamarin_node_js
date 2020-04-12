@@ -232,7 +232,7 @@ app.post('/DenOfArtRegister',(request,response,next)=> {
 
     // Get a reference to the database service
     var db = firebase.database();
-    var dbRef = db.ref('DenOfArtUsers');
+    var dbRef = db.ref.child('DenOfArtUsers');
     dbRef.set(insertJson);
     console.log('User Registeration Successful..');  
     response.json('User Registeration Successful..');  
