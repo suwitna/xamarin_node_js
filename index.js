@@ -215,6 +215,46 @@ app.post('/firebase',(request,response,next)=> {
        */ 
 });
 
+app.post('/DenOfArtUserExist',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Check User Exist");
+    var post_data = request.body;  
+  
+    var loginname = post_data.username;
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtUsers');
+    var existUser = false;
+
+    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        console.log('vals:', vals);
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            var jsonObj = {data:[]};
+            var obj = {};
+            console.log('keys.length:', keys.length);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var user = vals[k].UserName;
+                
+                if(loginname == user){
+                    existUser = true;
+                    obj[k] = vals[k];
+                    jsonObj.data.push(vals[k]);
+                }
+            }
+        }
+        if (!existUser){
+            console.log(existUser);
+            response.send(existUser);
+        }else{
+            console.log(existUser);
+            response.send(existUser);
+        }
+    });
+});
+
 app.post('/DenOfArtRegister',(request,response,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Register");
     var post_data = request.body;  
