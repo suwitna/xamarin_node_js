@@ -418,22 +418,24 @@ app.post('/DenOfArtChangePassword',(request,response,next)=> {
 
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
-        var keys = Object.keys(vals);
-        for(var i=0; i<keys.length; i++){
-            var k = keys[i];
-            var password = vals[k].Password;
-            
-            if(loginpassword == password){
-                var dataObj = vals[k]
-                console.log('user key', k);
-                console.log('newpassword', newpassword);
-                var dataRef = dbRef.child(k);
-                dataRef.update({
-                    "Password": newpassword
-                });
-                if(!isDone){
-                    isDone = true;
-                    break;
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var password = vals[k].Password;
+                
+                if(loginpassword == password){
+                    var dataObj = vals[k]
+                    console.log('user key', k);
+                    console.log('newpassword', newpassword);
+                    var dataRef = dbRef.child(k);
+                    dataRef.update({
+                        "Password": newpassword
+                    });
+                    if(!isDone){
+                        isDone = true;
+                        break;
+                    }
                 }
             }
         }
