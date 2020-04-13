@@ -379,17 +379,19 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
 
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
-        var keys = Object.keys(vals);
-        var jsonObj = {data:[]};
-        var obj = {};
-        for(var i=0; i<keys.length; i++){
-            var k = keys[i];
-            var password = vals[k].Password;
-            
-            if(loginpassword == password){
-                existUser = true;
-                obj[k] = vals[k];
-                jsonObj.data.push(vals[k]);
+        if(vals !=null && vals !=''){
+            var keys = Object.keys(vals);
+            var jsonObj = {data:[]};
+            var obj = {};
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var password = vals[k].Password;
+                
+                if(loginpassword == password){
+                    existUser = true;
+                    obj[k] = vals[k];
+                    jsonObj.data.push(vals[k]);
+                }
             }
         }
         if (!existUser){
