@@ -1,5 +1,4 @@
 //Import Packages  
-  
 var mongodb = require('mongodb');  
 var ObjectID = mongodb.ObjectID;  
 var crypto = require('crypto');  
@@ -18,7 +17,29 @@ admin.initializeApp({
 */
 //Password Utils  
 //Create Function to Random Salt  
-  
+
+//var algorithm = 'aes-256-ctr';
+//var password = 'c8167bf6dfea7d8fbec4413420fe943a';
+const algorithm = 'aes-192-cbc';
+const password = 'c8167bf6dfea7d8fbec4413420fe943a';
+// Key length is dependent on the algorithm. In this case for aes192, it is
+// 24 bytes (192 bits).
+// Use async `crypto.scrypt()` instead.
+const key = crypto.scryptSync(password, 'salt', 24);
+// Use `crypto.randomBytes()` to generate a random iv instead of the static iv
+// shown here.
+const iv = Buffer.alloc(16, 0); // Initialization vector.
+
+
+function encrypt(text) {
+    var cipher = crypto.createCipheriv(algorithm, key, iv);
+    var encrypted = cipher.update(text,'utf8','hex');
+    encrypted += cipher.final('hex');
+    console.log("encrypt:", encrypted.toString());
+    return encrypted.toString();
+}
+
+
 var generateRandomString = function(length){  
     return crypto.randomBytes(Math.ceil(length/2))  
     .toString('hex') /* Convert to hexa formate */  
@@ -260,7 +281,10 @@ app.post('/DenOfArtRegister',(request,response,next)=> {
     var post_data = request.body;  
     var name = post_data.username;  
     var email = post_data.email;
-    var password = post_data.password;  
+    
+    var plain_password = post_data.password;  
+    var password = encrypt(plain_password);
+
     var mobile = post_data.phonenumber; 
     var isExist = false;
 
@@ -368,10 +392,23 @@ app.post('/DenOfArtRegister',(request,response,next)=> {
 
 app.post('/DenOfArtLogin',(request,response,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Login");
-    var post_data = request.body;  
-  
+    var post_data = request.body;
+
+    if(Object.keys(post_data).length === 0){
+        console.log('Not found username and password parameters');
+        response.send(false);
+        return;
+    }
+    
     var loginname = post_data.username;
-    var loginpassword = post_data.password;  
+    var loginpassword = post_data.password;
+
+    if (loginname == undefined || loginpassword == undefined){
+        console.log('Username and password can not empty!');
+        response.send(false);
+        return;
+    }
+
     // Get a reference to the database service
     var db = firebase.database();
     var dbRef = db.ref('DenOfArtUsers');
@@ -386,8 +423,7 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
             for(var i=0; i<keys.length; i++){
                 var k = keys[i];
                 var password = vals[k].Password;
-                
-                if(loginpassword == password){
+                if(encrypt(loginpassword) == password){
                     existUser = true;
                     obj[k] = vals[k];
                     jsonObj.data.push(vals[k]);
@@ -406,10 +442,22 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
 
 app.post('/DenOfArtChangePassword',(request,response,next)=> { 
     console.log("HTTP POST Request :: Den of Art Change Password");
-    var post_data = request.body;  
+    var post_data = request.body;
+    if(Object.keys(post_data).length === 0){
+        console.log('Not found username or password parameters');
+        response.send(false);
+        return;
+    }
+
     var loginname = post_data.username;
     var loginpassword = post_data.password;
     var newpassword = post_data.newpassword;
+
+    if (loginname == undefined || loginpassword == undefined || newpassword == undefined){
+        console.log('Username, password or new password can not empty!');
+        response.send(false);
+        return;
+    }
 
     // Get a reference to the database service
     var db = firebase.database();
@@ -424,13 +472,14 @@ app.post('/DenOfArtChangePassword',(request,response,next)=> {
                 var k = keys[i];
                 var password = vals[k].Password;
                 
-                if(loginpassword == password){
+                if(encrypt(loginpassword) == password){
                     var dataObj = vals[k]
                     console.log('user key', k);
-                    console.log('newpassword', newpassword);
+                    console.log('loginpassword', encrypt(loginpassword));
+                    console.log('newpassword', encrypt(newpassword));
                     var dataRef = dbRef.child(k);
                     dataRef.update({
-                        "Password": newpassword
+                        "Password": encrypt(newpassword)
                     });
                     if(!isDone){
                         isDone = true;
