@@ -493,3 +493,114 @@ app.post('/DenOfArtChangePassword',(request,response,next)=> {
     });
     
 });
+
+app.post('/DenOfArtCreatAppointment',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Add Appointment");
+    var post_data = request.body;  
+    var username = post_data.username;
+    var hn = post_data.hn;
+    var customername = post_data.customername;
+    var subject = post_data.subject;
+    var appointmentdate = post_data.appointmentdate;//format DateTime# dd/MM/yyyy
+    var appointmenttime = post_data.appointmenttime;//format DateTime# hh:mm
+    var isapprove = post_data.isapprove;//Y or ''
+    var istreat = post_data.istreat;//Y or ''
+    var treatby = post_data.treatby;
+    var treatdetail = post_data.treatdetail;
+    var treatdate = post_data.treatdate;//format DateTime# dd/MM/yyyy
+    var treattime = post_data.treattime;//format DateTime# hh:mm
+    var iscancel = post_data.iscancel;//Y or ''
+    var cancelreason = post_data.cancelreason;
+    var ispostpone = post_data.ispostpone;//Y or ''
+    var postponereason = post_data.postponereason;
+    var createby = post_data.createby;
+    var createdate = post_data.createdate;//format DateTime# dd/MM/yyyy hh:mm
+    var updateby = post_data.updateby;
+    var updatedate = post_data.updatedate;//format DateTime# dd/MM/yyyy hh:mm
+
+    var isExist = false;
+
+    var insertJson = {  
+        'UserName':username == undefined?'':username ,
+        'HN':hn == undefined?'':hn ,
+        'CustomerName':customername == undefined?'':customername ,
+        'Subject':subject == undefined?'':subject ,
+        'AppointmentDate':appointmentdate == undefined?'':appointmentdate ,
+        'AppointmentTime':appointmenttime == undefined?'':appointmenttime ,
+        'IsApprove':isapprove == undefined?'':isapprove ,
+        'IsTreat':istreat == undefined?'':istreat ,
+        'TreatBy':treatby == undefined?'':treatby ,
+        'TreatDetail':treatdetail == undefined?'':treatdetail ,
+        'TreatDate':treatdate == undefined?'':treatdate ,
+        'TreatTime':treattime == undefined?'':treattime ,
+        'IsCancel':iscancel == undefined?'':iscancel ,
+        'CancelReason':cancelreason == undefined?'':cancelreason ,
+        'IsPostpone':ispostpone == undefined?'':ispostpone ,
+        'PostponeReason':postponereason == undefined?'':postponereason ,
+        'CreateBy':createby == undefined?'':createby ,
+        'CreateDate':createdate == undefined?'':createdate ,
+        'UpdateBy':updateby == undefined?'':updateby ,
+        'UpdateDate':updatedate == undefined?'':updatedate 
+    };
+    console.log(insertJson);
+    // Get a reference to the database service
+    var db = firebase.database();
+    var rootRef = db.ref();
+    
+    var dbRef = db.ref('DenOfArtAppointment');
+    dbRef.orderByChild('UserName').equalTo(username).once('value', (snapshot)=>{
+        if(snapshot != null && snapshot != ''){
+            if(snapshot.exists){
+                var vals = snapshot.val();
+                if(vals!=null && vals != ''){
+                    var keys = Object.keys(vals);
+                    for(var i=0; i<keys.length; i++){
+                        var k = keys[i];
+                        var appHistDate = vals[k].AppointmentDate;
+                        
+                        if(appointmentdate == appHistDate){
+                            isExist = true;
+                            console.log("Appointment date was exit!");
+                            response.send("FAIL");
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        console.log("DenOfArtAppointment not found, can add..");
+        var usersRef = rootRef.child("DenOfArtAppointment");
+        var userRef = usersRef.push();
+        console.log('user key', userRef.key);
+        dbRef.push(userRef.key).set(insertJson);
+        console.log(insertJson);
+        response.send(insertJson);
+        return;
+    });
+});
+
+app.post('/DenOfArtGetAppointment',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Get Appointment");
+    var jsonObj = {Data:[]};
+    var post_data = request.body;  
+  
+    var username = post_data.username;  
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtAppointment');
+    dbRef.orderByChild('UserName').equalTo(username).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        if(vals!= null && vals != ''){
+            var keys = Object.keys(vals);
+            var obj = {};
+
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                console.log('keys[i]>>>'+ k );
+                obj[k] = vals[k];
+                jsonObj.Data.push(vals[k]);
+            }
+        }
+        response.json(jsonObj);
+    });
+});
