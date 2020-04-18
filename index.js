@@ -617,17 +617,13 @@ function reply(reply_token) {
 
     let body = JSON.stringify({
         replyToken: reply_token,
-        messages: [{
-            type: 'text',
-            text: 'Hello'
-        },
-        {
-            type: 'text',
-            text: 'How are you?'
-        }]
+        messages: 'Hello Suvit',
+        targetType : 'USER',
+        target : 'suvit2599'
     })
     request.post({
-        url: 'https://api.line.me/v2/bot/message/reply',
+        //url: 'https://api.line.me/v2/bot/message/reply',
+        url: 'https://notify-api.line.me/api/status',
         headers: headers,
         body: body
     }, (err, res, body) => {
