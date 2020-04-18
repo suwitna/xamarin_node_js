@@ -542,11 +542,13 @@ app.post('/webhook',(req,res,next)=> {
     var reply_token = req.body.events[0].replyToken;
     var user_type = req.body.events[0].source.type;
     var user_id = req.body.events[0].source.userId
+    var msg = req.body.events[0].message.text;
 
     console.log(`Message token : ${ reply_token }`);
     console.log(`Message user Type : ${ user_type }`);
     console.log(`Message user ID : ${ user_id }`);
-    reply(reply_token);
+    console.log(`Message user ID : ${ msg }`);
+    //reply(reply_token);
     res.sendStatus(200);
     //var replyToken = req.body.events[0].replyToken;
     //var msg = req.body.events[0].message.text;
@@ -655,18 +657,45 @@ function pushMessage(reply_token) {
     }
 
     let body = JSON.stringify({
-        to: 'U95d0e01a7247c7e3f167b118cf424f6e',
+        //to: 'U95d0e01a7247c7e3f167b118cf424f6e',
+        to:'U3408f00a20e28ab3486a8563c2027537',
         messages: [{
             type: 'text',
-            text: 'ทดสอบ'
-        },
-        {
-            type: 'text',
-            text: 'ทดสอบ 2'
+            text: '900 บาทครับ'
         }]
     })
     request.post({
         url: 'https://api.line.me/v2/bot/message/push',
+        headers: headers,
+        body: body
+    }, (err, res, body) => {
+        console.log('status = ' + res.statusCode);
+    });
+}
+
+app.post('/LINEBroadcastMessage',(req,res,next)=> { 
+    console.log("HTTP POST Request :: LINEBroadcastMessage");
+    var reply_token = 'Not need to use token';
+    console.log(`Message token : ${ reply_token }`);
+    broadcastMessage();
+    res.sendStatus(200);
+});
+
+function broadcastMessage() {
+    let headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
+    }
+
+    let body = JSON.stringify({
+        messages: [{
+            type: 'text',
+            text: 'ทดสอบการปล่อยข้อมูลไปยังสมาชิกทุกท่าน'
+        }]
+    })
+    request.post({
+        method: 'POST',
+        url: 'https://api.line.me/v2/bot/message/broadcast',
         headers: headers,
         body: body
     }, (err, res, body) => {
