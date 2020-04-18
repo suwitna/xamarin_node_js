@@ -542,7 +542,7 @@ app.post('/webhook',(req,res,next)=> {
     var reply_token = req.body.events[0].replyToken;
     var user_type = req.body.events[0].source.type;
     var user_id = req.body.events[0].source.userId
-    var msg = req.body.events[0].messages;
+    var msg = req.body.events[0].message.text;
 
     console.log(`Message token : ${ reply_token }`);
     console.log(`Message user Type : ${ user_type }`);
