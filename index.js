@@ -5,21 +5,10 @@ var crypto = require('crypto');
 var express = require('express');  
 var bodyParser = require('body-parser');
 var firebase = require('firebase');
-/*
-var admin = require("firebase-admin");
+const request = require('request');
 
-var serviceAccount = require("path/to/serviceAccountKey.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://maplocation-4b2a1.firebaseio.com"
-});
-*/
 //Password Utils  
 //Create Function to Random Salt  
-
-//var algorithm = 'aes-256-ctr';
-//var password = 'c8167bf6dfea7d8fbec4413420fe943a';
 const algorithm = 'aes-192-cbc';
 const password = 'c8167bf6dfea7d8fbec4413420fe943a';
 // Key length is dependent on the algorithm. In this case for aes192, it is
@@ -105,9 +94,9 @@ var config = {
 firebase.initializeApp(config);
 
 //Register   
-app.post('/register',(request,response,next)=>  
+app.post('/register',(req,res,next)=>  
 {  
-    var post_data = request.body;  
+    var post_data = req.body;  
 
     var plain_password = post_data.password;  
     var hash_data = saltHashPassword(plain_password);  
@@ -123,7 +112,7 @@ app.post('/register',(request,response,next)=>
         'password': password
     }; 
     console.log('User Registeration Successful..');  
-    response.json('User Registeration Successful..');  
+    res.json('User Registeration Successful..');  
     /*
     var db = client.db('ahsannodejs');  
 
@@ -131,12 +120,12 @@ app.post('/register',(request,response,next)=>
     db.collection('user').find({'email':email}).count(function(err,number){  
         if(number != 0){  
             console.log('User Email already exist!');  
-            response.json('User Email already exist!');  
+            res.json('User Email already exist!');  
         }else{  
             //Insert data  
             db.collection('user').insertOne(insertJson,function(err,res){  
                 console.log('User Registeration Successful..');  
-                response.json('User Registeration Successful..');  
+                res.json('User Registeration Successful..');  
             });  
         }  
     });  
@@ -144,9 +133,9 @@ app.post('/register',(request,response,next)=>
 });  
   
 //Login  
-app.post('/login',(request,response,next)=>  
+app.post('/login',(req,res,next)=>  
 {  
-    var post_data = request.body;  
+    var post_data = req.body;  
 
     var email = post_data.email;  
     var userPassword = post_data.password;
@@ -159,7 +148,7 @@ app.post('/login',(request,response,next)=>
     db.collection('user').find({'email':email}).count(function(err,number){  
         if(number == 0){  
             console.log('User Email not exist!');  
-            response.json('User Email not exist!');  
+            res.json('User Email not exist!');  
         }else{  
             //Insert data  
             db.collection('user').findOne({'email':email},function(err,user)  
@@ -170,27 +159,27 @@ app.post('/login',(request,response,next)=>
                 if(hashed_password == encrypted_password)  
                 {  
                     console.log('User Login Successful..');  
-                    response.json('User Login Successful..');  
+                    res.json('User Login Successful..');  
                 }else  
                 {  
                     console.log('Login Failed Wrong Password..');  
-                    response.json('Login Failed Wrong Password..');  
+                    res.json('Login Failed Wrong Password..');  
                 }  
             });  
         }  
     });  
     */
     console.log('User Login Successful..');  
-    response.json('User Login Successful..');  
+    res.json('User Login Successful..');  
 });  
 
 //}
 //);  
 
 
-app.post('/firebase',(request,response,next)=> { 
+app.post('/firebase',(req,res,next)=> { 
     console.log("HTTP Get Request :: Firebase");
-    var post_data = request.body;  
+    var post_data = req.body;  
   
     var PostalCode = post_data.PostalCode;  
     // Get a reference to the database service
@@ -215,9 +204,9 @@ app.post('/firebase',(request,response,next)=> {
                 
             }
         }
-        response.json(jsonObj);
+        res.json(jsonObj);
         //console.log(snapshot.val());
-        //response.json(snapshot.val());
+        //res.json(snapshot.val());
     });
     /*
     var ref = firebase.database().ref("MapTracking");
@@ -226,19 +215,19 @@ app.post('/firebase',(request,response,next)=> {
     ref.on("value",
         function(snapshot) {
             console.log(snapshot.val());
-            response.json(snapshot.val());
+            res.json(snapshot.val());
             ref.off("value");
         }, 
         function (errorObject) {
             console.log("The read failed: " + errorObject.code);
-            response.send("The read failed: " + errorObject.code);
+            res.send("The read failed: " + errorObject.code);
         });
        */ 
 });
 
-app.post('/DenOfArtUserExist',(request,response,next)=> { 
+app.post('/DenOfArtUserExist',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Check User Exist");
-    var post_data = request.body;  
+    var post_data = req.body;  
   
     var loginname = post_data.username;
 
@@ -268,17 +257,17 @@ app.post('/DenOfArtUserExist',(request,response,next)=> {
         }
         if (!existUser){
             console.log(existUser);
-            response.send(existUser);
+            res.send(existUser);
         }else{
             console.log(existUser);
-            response.send(existUser);
+            res.send(existUser);
         }
     });
 });
 
-app.post('/DenOfArtRegister',(request,response,next)=> { 
+app.post('/DenOfArtRegister',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Register");
-    var post_data = request.body;  
+    var post_data = req.body;  
     var name = post_data.username;  
     var email = post_data.email;
     
@@ -298,17 +287,8 @@ app.post('/DenOfArtRegister',(request,response,next)=> {
     // Get a reference to the database service
     var db = firebase.database();
     var rootRef = db.ref();
-    
-    /*
-    var usersRef = rootRef.child("DenOfArtUsers");
-    var userRef = usersRef.push();
-    console.log('user key', userRef.key);
-    usersRef.push(userRef.key).set(insertJson);
-    console.log("User Registeration Successful..");
-    console.log(insertJson);
-    response.send(insertJson);
-    */
     var dbRef = db.ref('DenOfArtUsers');
+
     dbRef.orderByChild('UserName').equalTo(name).once('value', (snapshot)=>{
         if(snapshot != null && snapshot != ''){
             if(snapshot.exists){
@@ -321,82 +301,34 @@ app.post('/DenOfArtRegister',(request,response,next)=> {
                         
                         if(name == username){
                             isExist = true;
-                            console.log("Username was exit!");
+                            console.log('Username was exit!');
+                            res.send('FAIL');
+                            return;
                         }
                     }
-                }else{
-                    isExist = false;
-                    console.log("Username not found, can add");
-                    var usersRef = rootRef.child("DenOfArtUsers");
-                    var userRef = usersRef.push();
-                    console.log('user key', userRef.key);
-                    dbRef.push(userRef.key).set(insertJson);
-                    console.log(insertJson);
-                    response.send(insertJson);
                 }
-            }else{
-                isExist = false;
-                console.log("DenOfArtUsers not found(NOT EXIST)!");
-                var usersRef = rootRef.child("DenOfArtUsers");
-                var userRef = usersRef.push();
-                console.log('user key', userRef.key);
-                dbRef.push(userRef.key).set(insertJson);
-                console.log(insertJson);
-                response.send(insertJson);
             }
-        }else{
-            isExist = false;
-            console.log("DenOfArtUsers not found(NULL)!");
-            var usersRef = rootRef.child("DenOfArtUsers");
-            var userRef = usersRef.push();
-            console.log('user key', userRef.key);
-            dbRef.push(userRef.key).set(insertJson);
-            console.log(insertJson);
-            response.send(insertJson);
         }
 
-        if (isExist){
-            console.log("FAIL");
-            response.send("FAIL");
-        }
+        isExist = false;
+        console.log('DenOfArtUsers not found, user can register');
+        var usersRef = rootRef.child("DenOfArtUsers");
+        var userRef = usersRef.push();
+        console.log('user key', userRef.key);
+        dbRef.push(userRef.key).set(insertJson);
+        console.log(insertJson);
+        res.send(insertJson);
+        return;
     });
-    
-    
-    /*
-    var dbRef = db.ref('DenOfArtUsers');
-    dbRef.once('value', (snapshot)=>{
-        if(snapshot.exists()){
-            console.log("DenOfArtUsers is exist");
-            var userRef = dbRef.push();
-            console.log('user key', userRef.key);
-            dbRef.push(userRef.key).set(insertJson);
-        }else{
-            console.log("DenOfArtUsers is not exist!");
-            var usersRef = rootRef.child("DenOfArtUsers");
-            var userRef = usersRef.push();
-            console.log('user key', userRef.key);
-            dbRef.push(userRef.key).set(insertJson);
-        }
-
-        //dbRef.set(insertJson);
-        if (data ==''){
-            console.log('FAIL');
-            response.send('FAIL');
-        }else{
-            console.log(insertJson);
-            response.send(insertJson);
-        }
-    });
-    */
 });
 
-app.post('/DenOfArtLogin',(request,response,next)=> { 
+app.post('/DenOfArtLogin',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Login");
-    var post_data = request.body;
+    var post_data = req.body;
 
     if(Object.keys(post_data).length === 0){
         console.log('Not found username and password parameters');
-        response.send(false);
+        res.send(false);
         return;
     }
     
@@ -405,7 +337,7 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
 
     if (loginname == undefined || loginpassword == undefined){
         console.log('Username and password can not empty!');
-        response.send(false);
+        res.send(false);
         return;
     }
 
@@ -432,20 +364,20 @@ app.post('/DenOfArtLogin',(request,response,next)=> {
         }
         if (!existUser){
             console.log(existUser);
-            response.send(existUser);
+            res.send(existUser);
         }else{
             console.log(existUser);
-            response.send(existUser);
+            res.send(existUser);
         }
     });
 });
 
-app.post('/DenOfArtChangePassword',(request,response,next)=> { 
+app.post('/DenOfArtChangePassword',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Change Password");
-    var post_data = request.body;
+    var post_data = req.body;
     if(Object.keys(post_data).length === 0){
         console.log('Not found username or password parameters');
-        response.send(false);
+        res.send(false);
         return;
     }
 
@@ -455,7 +387,7 @@ app.post('/DenOfArtChangePassword',(request,response,next)=> {
 
     if (loginname == undefined || loginpassword == undefined || newpassword == undefined){
         console.log('Username, password or new password can not empty!');
-        response.send(false);
+        res.send(false);
         return;
     }
 
@@ -489,14 +421,14 @@ app.post('/DenOfArtChangePassword',(request,response,next)=> {
             }
         }
         console.log(isDone);
-        response.send(isDone);
+        res.send(isDone);
     });
     
 });
 
-app.post('/DenOfArtCreatAppointment',(request,response,next)=> { 
+app.post('/DenOfArtCreatAppointment',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Add Appointment");
-    var post_data = request.body;  
+    var post_data = req.body;  
     var username = post_data.username;
     var hn = post_data.hn;
     var customername = post_data.customername;
@@ -561,7 +493,7 @@ app.post('/DenOfArtCreatAppointment',(request,response,next)=> {
                         if(appointmentdate == appHistDate){
                             isExist = true;
                             console.log("Appointment date was exit!");
-                            response.send("FAIL");
+                            res.send("FAIL");
                             return;
                         }
                     }
@@ -574,15 +506,15 @@ app.post('/DenOfArtCreatAppointment',(request,response,next)=> {
         console.log('user key', userRef.key);
         dbRef.push(userRef.key).set(insertJson);
         console.log(insertJson);
-        response.send(insertJson);
+        res.send(insertJson);
         return;
     });
 });
 
-app.post('/DenOfArtGetAppointment',(request,response,next)=> { 
+app.post('/DenOfArtGetAppointment',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Get Appointment");
     var jsonObj = {Data:[]};
-    var post_data = request.body;  
+    var post_data = req.body;  
   
     var username = post_data.username;  
     // Get a reference to the database service
@@ -601,42 +533,88 @@ app.post('/DenOfArtGetAppointment',(request,response,next)=> {
                 jsonObj.Data.push(vals[k]);
             }
         }
-        response.json(jsonObj);
+        res.json(jsonObj);
     });
 });
 
-app.post('/webhook',(request,response,next)=> { 
+app.post('/webhook',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Line App Webhook");
-    var replyToken = request.body.events[0].replyToken;
-    var msg = request.body.events[0].message.text;
+    var reply_token = req.body.events[0].replyToken;
+    console.log(`Message token : ${ reply_token }`);
+    reply(reply_token);
+    res.sendStatus(200);
+    //var replyToken = req.body.events[0].replyToken;
+    //var msg = req.body.events[0].message.text;
     
-    console.log(`Message token : ${ replyToken }`);
-    console.log(`Message from chat : ${ msg }`);
+    //console.log(`Message token : ${ replyToken }`);
+    //console.log(`Message from chat : ${ msg }`);
 
-    response.json({
-        status: 200,
-        replyToken: replyToken,
-        messages: [{
-            type: 'text',
-            text: 'Hello'
-        },
-        {
-            type: 'text',
-            text: 'How are you?'
-        }]
-    });
     /*
-    response.json({
+    res.json({
         status: 200,
         message: `Webhook is working!`
     });
     */
-   /*
-    var reply_token = request.body.events[0].replyToken
+    /*
+    //var reply_token = req.body.events[0].replyToken
     var headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
+    }
+    var body = {
+        status: 200,
+        messages: 'Test',
+        USER: 'suvit2599'
+        
+    };
+
+    res.json({
+        url: 'https://notify-api.line.me/api/status',
+        headers: headers,
+        message: body
+    });
+    */
+    //Custom Header pass
+    /*
+
+    var headersOpt = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
+    };
+
+    var body = {
+        status: 200,
+        messages: 'Test',
+        USER: 'suvit2599'
+        
+    };
+
+    var options = {
+        url: 'https://notify-api.line.me/api/status',
+        method: 'POST',
+        headers: headersOpt,
+        body : body
+      }
+
+    var req = https.req(options, res => {
+        console.log(`statusCode: ${res.statusCode}`)
+      });
+      
+      req.on('error', error => {
+        console.error(error)
+      });
+
+
+    res.sendStatus(200);
+    */
+});
+
+function reply(reply_token) {
+    let headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
     }
+
     let body = JSON.stringify({
         replyToken: reply_token,
         messages: [{
@@ -655,13 +633,10 @@ app.post('/webhook',(request,response,next)=> {
     }, (err, res, body) => {
         console.log('status = ' + res.statusCode);
     });
+}
 
-    response.sendStatus(200);
-    */
-});
-
-app.get('/wakeup',(request,response,next)=>  
+app.get('/wakeup',(req,res,next)=>  
 {  
     console.log('Hey, Heroku wakeup!!!');  
-    response.sendStatus(200);
+    res.sendStatus(200);
 });  
