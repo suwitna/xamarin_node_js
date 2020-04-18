@@ -604,3 +604,8 @@ app.post('/DenOfArtGetAppointment',(request,response,next)=> {
         response.json(jsonObj);
     });
 });
+
+app.post('/webhook',(request,response,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Line App Webhook");
+    response.sendStatus(200);
+});
