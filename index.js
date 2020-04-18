@@ -540,7 +540,12 @@ app.post('/DenOfArtGetAppointment',(req,res,next)=> {
 app.post('/webhook',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Line App Webhook");
     var reply_token = req.body.events[0].replyToken;
+    var user_type = req.body.events[0].source.type;
+    var user_id = req.body.events[0].source.userId
+
     console.log(`Message token : ${ reply_token }`);
+    console.log(`Message user Type : ${ user_type }`);
+    console.log(`Message user ID : ${ user_id }`);
     reply(reply_token);
     res.sendStatus(200);
     //var replyToken = req.body.events[0].replyToken;
@@ -617,13 +622,51 @@ function reply(reply_token) {
 
     let body = JSON.stringify({
         replyToken: reply_token,
-        messages: 'Hello Suvit',
-        targetType : 'USER',
-        target : 'suvit2599'
+        messages: [{
+            type: 'text',
+            text: 'Hello'
+        },
+        {
+            type: 'text',
+            text: 'How are you?'
+        }]
     })
     request.post({
-        //url: 'https://api.line.me/v2/bot/message/reply',
-        url: 'https://notify-api.line.me/api/status',
+        url: 'https://api.line.me/v2/bot/message/reply',
+        headers: headers,
+        body: body
+    }, (err, res, body) => {
+        console.log('status = ' + res.statusCode);
+    });
+}
+
+app.post('/LINEPushMessage',(req,res,next)=> { 
+    console.log("HTTP POST Request :: LINEPushMessage");
+    var reply_token = 'Not need to use token';
+    console.log(`Message token : ${ reply_token }`);
+    pushMessage(reply_token);
+    res.sendStatus(200);
+});
+
+function pushMessage(reply_token) {
+    let headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
+    }
+
+    let body = JSON.stringify({
+        to: 'U95d0e01a7247c7e3f167b118cf424f6e',
+        messages: [{
+            type: 'text',
+            text: 'ทดสอบ'
+        },
+        {
+            type: 'text',
+            text: 'ทดสอบ 2'
+        }]
+    })
+    request.post({
+        url: 'https://api.line.me/v2/bot/message/push',
         headers: headers,
         body: body
     }, (err, res, body) => {
