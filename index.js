@@ -615,10 +615,23 @@ app.post('/webhook',(request,response,next)=> {
 
     response.json({
         status: 200,
+        replyToken: replyToken,
+        messages: [{
+            type: 'text',
+            text: 'Hello'
+        },
+        {
+            type: 'text',
+            text: 'How are you?'
+        }]
+    });
+    /*
+    response.json({
+        status: 200,
         message: `Webhook is working!`
     });
-
-    /*
+    */
+   /*
     var reply_token = request.body.events[0].replyToken
     var headers = {
         'Content-Type': 'application/json',
