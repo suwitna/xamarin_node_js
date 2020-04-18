@@ -608,11 +608,16 @@ app.post('/DenOfArtGetAppointment',(request,response,next)=> {
 app.post('/webhook',(request,response,next)=> { 
     console.log("HTTP POST Request :: Den of Art Line App Webhook");
     var reply_token = request.body.events[0].replyToken
-    var headers = {
+    reply(reply_token)
+    response.sendStatus(200);
+});
+
+function reply(reply_token) {
+    let headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
     }
-    var body = JSON.stringify({
+    let body = JSON.stringify({
         replyToken: reply_token,
         messages: [{
             type: 'text',
@@ -627,8 +632,7 @@ app.post('/webhook',(request,response,next)=> {
         url: 'https://api.line.me/v2/bot/message/reply',
         headers: headers,
         body: body
-    }, (err, response, body) => {
-        console.log('status = ' + response.statusCode);
+    }, (err, res, body) => {
+        console.log('status = ' + res.statusCode);
     });
-    response.sendStatus(200);
-});
+}
