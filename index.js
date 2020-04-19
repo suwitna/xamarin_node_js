@@ -547,7 +547,9 @@ app.post('/webhook',(req,res,next)=> {
     console.log(`Message token : ${ reply_token }`);
     console.log(`Message user Type : ${ user_type }`);
     console.log(`Message user ID : ${ user_id }`);
-    console.log(`Message : ${ msg }`);
+    if (msg != null && msg != undefined){
+        console.log(`Message : ${ msg.toString('utf8') }`);
+    }
     //reply(reply_token);
     res.sendStatus(200);
     //var replyToken = req.body.events[0].replyToken;
