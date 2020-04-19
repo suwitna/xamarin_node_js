@@ -77,7 +77,7 @@ if(err)
 else  
 {  
     //Start Web Server  
-    app.listen(port,()=> {console.log('Connected to MongoDb server, Webservice running on on port '+ port);  
+    app.listen(port,()=> {console.log('Connected to NodeJS server, Webservice running on on port '+ port);  
 });  
 }  
 // Set the configuration for your app
@@ -233,7 +233,7 @@ app.post('/DenOfArtUserExist',(req,res,next)=> {
 
     // Get a reference to the database service
     var db = firebase.database();
-    var dbRef = db.ref('DenOfArtUsers');
+    var dbRef = db.ref('DenOfArtUser');
     var existUser = false;
 
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
@@ -265,6 +265,53 @@ app.post('/DenOfArtUserExist',(req,res,next)=> {
     });
 });
 
+app.post('/DenOfArtGetUserData',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Get User Data");
+    var post_data = req.body;  
+  
+    var loginname = post_data.username;
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtUser');
+    var existUser = false;
+
+    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        var obj = {};
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            
+            console.log('keys.length:', keys.length);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var user = vals[k].UserName;
+                
+                if(loginname == user){
+                    existUser = true;
+                    obj[k] = vals[k];
+                    console.log({
+                        'Email': vals[k].Email,
+                        'Password': vals[k].Password,
+                        'PhoneNumber': vals[k].PhoneNumber,
+                        'UserName': vals[k].UserName
+                    });
+                    res.json({
+                        'Email': vals[k].Email,
+                        'Password': vals[k].Password,
+                        'PhoneNumber': vals[k].PhoneNumber,
+                        'UserName': vals[k].UserName
+                    });
+                    return;
+                }
+            }
+        }
+
+        console.log(obj);
+        res.json(obj);
+    });
+});
+
 app.post('/DenOfArtRegister',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Register");
     var post_data = req.body;  
@@ -287,7 +334,7 @@ app.post('/DenOfArtRegister',(req,res,next)=> {
     // Get a reference to the database service
     var db = firebase.database();
     var rootRef = db.ref();
-    var dbRef = db.ref('DenOfArtUsers');
+    var dbRef = db.ref('DenOfArtUser');
 
     dbRef.orderByChild('UserName').equalTo(name).once('value', (snapshot)=>{
         if(snapshot != null && snapshot != ''){
@@ -311,8 +358,8 @@ app.post('/DenOfArtRegister',(req,res,next)=> {
         }
 
         isExist = false;
-        console.log('DenOfArtUsers not found, user can register');
-        var usersRef = rootRef.child("DenOfArtUsers");
+        console.log('DenOfArtUser not found, user can register');
+        var usersRef = rootRef.child("DenOfArtUser");
         var userRef = usersRef.push();
         console.log('user key', userRef.key);
         dbRef.push(userRef.key).set(insertJson);
@@ -343,7 +390,7 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
 
     // Get a reference to the database service
     var db = firebase.database();
-    var dbRef = db.ref('DenOfArtUsers');
+    var dbRef = db.ref('DenOfArtUser');
     var existUser = false;
 
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
@@ -393,7 +440,7 @@ app.post('/DenOfArtChangePassword',(req,res,next)=> {
 
     // Get a reference to the database service
     var db = firebase.database();
-    var dbRef = db.ref('DenOfArtUsers');
+    var dbRef = db.ref('DenOfArtUser');
     var isDone = false;
 
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
@@ -426,6 +473,199 @@ app.post('/DenOfArtChangePassword',(req,res,next)=> {
     
 });
 
+app.post('/DenOfArtGetProfile',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Get Profile");
+    var jsonObj = {Data:[]};
+    var post_data = req.body;  
+  
+    var username = post_data.username;  
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtProfile');
+    dbRef.orderByChild('UserName').equalTo(username).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        if(vals!= null && vals != ''){
+            var keys = Object.keys(vals);
+            var obj = {};
+
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                console.log('keys[i]>>>'+ k );
+                obj[k] = vals[k];
+                jsonObj.Data.push(vals[k]);
+            }
+        }
+        res.json(jsonObj);
+    });
+});
+
+app.post('/DenOfArtAddProfile',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Add Profile");
+    var post_data = req.body;  
+    //Get parameters
+    var ProfileId = post_data.profileid;
+    var UserName = post_data.username;
+    var FirstName = post_data.firstname;
+    var LastName = post_data.lastname;
+    var Gender = post_data.gender;
+    var Age = post_data.age;
+    var DateOfBirth = post_data.dateofbirth;
+    var Address1 = post_data.address1;
+    var Address2 = post_data.address2;
+    var Address3 = post_data.address3;
+    var Email = post_data.email;
+    var PhoneNumber = post_data.phonenumber;
+    var Content = post_data.content;
+    var FileName = post_data.filename;
+    var LineID = post_data.lineid;
+    var CreateDate = post_data.createdate;
+    var UpdateDate = post_data.updatedate;
+
+    var insertJson = {  
+        'ProfileId':ProfileId == undefined?'':ProfileId,
+        'UserName':UserName == undefined?'':UserName,
+        'FirstName':FirstName == undefined?'':FirstName,
+        'LastName':LastName == undefined?'':LastName,
+        'Gender':Gender == undefined?'':Gender,
+        'Age':Age == undefined?'':Age,
+        'DateOfBirth':DateOfBirth == undefined?'':DateOfBirth,
+        'Address1':Address1 == undefined?'':Address1,
+        'Address2':Address2 == undefined?'':Address2,
+        'Address3':Address3 == undefined?'':Address3,
+        'Email':Email == undefined?'':Email,
+        'PhoneNumber':PhoneNumber == undefined?'':PhoneNumber,
+        'Content':Content == undefined?'':Content,
+        'FileName':FileName == undefined?'':FileName,
+        'LineID':LineID == undefined?'':LineID,
+        'CreateDate':CreateDate == undefined?'':CreateDate,
+        'UpdateDate':UpdateDate == undefined?'':UpdateDate
+    };
+    console.log(insertJson);
+    // Get a reference to the database service
+    var db = firebase.database();
+    var rootRef = db.ref();
+    
+    var dbRef = db.ref('DenOfArtProfile');
+    dbRef.orderByChild('UserName').equalTo(UserName).once('value', (snapshot)=>{
+        if(snapshot != null && snapshot != ''){
+            if(snapshot.exists){
+                var vals = snapshot.val();
+                if(vals!=null && vals != ''){
+                    var keys = Object.keys(vals);
+                    for(var i=0; i<keys.length; i++){
+                        var k = keys[i];
+                        var newUserName = vals[k].UserName;
+                        
+                        if(newUserName == UserName){
+                            console.log("Profile data was exit!");
+                            res.send("FAIL");
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        console.log("Profile not found, you can add more information.");
+        var usersRef = rootRef.child("DenOfArtProfile");
+        var userRef = usersRef.push();
+        console.log('user key', userRef.key);
+        dbRef.push(userRef.key).set(insertJson);
+        console.log(insertJson);
+        res.send(insertJson);
+        return;
+    });
+});
+
+app.post('/DenOfArtUpdateProfile',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Update Profile");
+    var post_data = req.body;
+    if(Object.keys(post_data).length === 0){
+        console.log('No data found');
+        res.send(false);
+        return;
+    }
+
+    //Get parameters
+    var ProfileId = post_data.profileid;
+    var UserName = post_data.username;
+    var FirstName = post_data.firstname;
+    var LastName = post_data.lastname;
+    var Gender = post_data.gender;
+    //var Age = post_data.age;
+    var DateOfBirth = post_data.dateofbirth;
+    var Address1 = post_data.address1;
+    var Address2 = post_data.address2;
+    var Address3 = post_data.address3;
+    var Email = post_data.email;
+    var PhoneNumber = post_data.phonenumber;
+    //var Content = post_data.content;
+    //var FileName = post_data.filename;
+    //var LineID = post_data.lineid;
+    //var CreateDate = post_data.createdate;
+    var UpdateDate = post_data.updatedate;
+    /*
+    var insertJson = {  
+        'ProfileId':ProfileId == undefined?'':ProfileId,
+        'UserName':UserName == undefined?'':UserName,
+        'FirstName':FirstName == undefined?'':FirstName,
+        'LastName':LastName == undefined?'':LastName,
+        'Gender':Gender == undefined?'':Gender,
+        'Age':Age == undefined?'':Age,
+        'DateOfBirth':DateOfBirth == undefined?'':DateOfBirth,
+        'Address1':Address1 == undefined?'':Address1,
+        'Address2':Address2 == undefined?'':Address2,
+        'Address3':Address3 == undefined?'':Address3,
+        'Email':Email == undefined?'':Email,
+        'PhoneNumber':PhoneNumber == undefined?'':PhoneNumber,
+        'Content':Content == undefined?'':Content,
+        'FileName':FileName == undefined?'':FileName,
+        'LineID':LineID == undefined?'':LineID,
+        'CreateDate':CreateDate == undefined?'':CreateDate,
+        'UpdateDate':UpdateDate == undefined?'':UpdateDate
+    };
+    */
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtProfile');
+
+    dbRef.orderByChild('UserName').equalTo(UserName).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var updateUserName = vals[k].UserName;
+                console.log('User Name:', UserName, ', ',updateUserName);
+                if(UserName == updateUserName){
+                    var dataObj = vals[k]
+                    console.log('user key', k);
+                    var dataRef = dbRef.child(k);
+                    dataRef.update({
+                        'ProfileId':ProfileId == undefined?'':ProfileId,
+                        'FirstName':FirstName == undefined?'':FirstName,
+                        'LastName':LastName == undefined?'':LastName,
+                        'Gender':Gender == undefined?'':Gender,
+                        'DateOfBirth':DateOfBirth == undefined?'':DateOfBirth,
+                        'Address1':Address1 == undefined?'':Address1,
+                        'Address2':Address2 == undefined?'':Address2,
+                        'Address3':Address3 == undefined?'':Address3,
+                        'Email':Email == undefined?'':Email,
+                        'PhoneNumber':PhoneNumber == undefined?'':PhoneNumber,
+                        'UpdateDate':UpdateDate == undefined?'':UpdateDate
+                    });
+                    console.log('true');
+                    res.send('true');
+                    return;
+                }
+            }
+        }
+        console.log('false');
+        res.send('false');
+        return;
+    });
+    
+});
+
 app.post('/DenOfArtCreatAppointment',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Add Appointment");
     var post_data = req.body;  
@@ -435,6 +675,7 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
     var subject = post_data.subject;
     var appointmentdate = post_data.appointmentdate;//format DateTime# dd/MM/yyyy
     var appointmenttime = post_data.appointmenttime;//format DateTime# hh:mm
+    var status = post_data.status;
     var isapprove = post_data.isapprove;//Y or ''
     var istreat = post_data.istreat;//Y or ''
     var treatby = post_data.treatby;
@@ -459,6 +700,7 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
         'Subject':subject == undefined?'':subject ,
         'AppointmentDate':appointmentdate == undefined?'':appointmentdate ,
         'AppointmentTime':appointmenttime == undefined?'':appointmenttime ,
+        'Status':status == undefined?'':status ,
         'IsApprove':isapprove == undefined?'':isapprove ,
         'IsTreat':istreat == undefined?'':istreat ,
         'TreatBy':treatby == undefined?'':treatby ,
@@ -492,7 +734,7 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
                         
                         if(appointmentdate == appHistDate){
                             isExist = true;
-                            console.log("Appointment date was exit!");
+                            console.log("Appointment data was exit!");
                             res.send("FAIL");
                             return;
                         }
@@ -500,7 +742,7 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
                 }
             }
         }
-        console.log("DenOfArtAppointment not found, can add..");
+        console.log("Appointment not found, you can add more information.");
         var usersRef = rootRef.child("DenOfArtAppointment");
         var userRef = usersRef.push();
         console.log('user key', userRef.key);
