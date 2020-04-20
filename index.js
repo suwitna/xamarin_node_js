@@ -6,6 +6,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var firebase = require('firebase');
 const request = require('request');
+var dateFormat = require('dateformat');
 
 //Password Utils  
 //Create Function to Random Salt  
@@ -508,18 +509,16 @@ app.post('/DenOfArtAddProfile',(req,res,next)=> {
     var FirstName = post_data.firstname;
     var LastName = post_data.lastname;
     var Gender = post_data.gender;
-    var Age = post_data.age;
     var DateOfBirth = post_data.dateofbirth;
     var Address1 = post_data.address1;
     var Address2 = post_data.address2;
     var Address3 = post_data.address3;
     var Email = post_data.email;
     var PhoneNumber = post_data.phonenumber;
-    var Content = post_data.content;
-    var FileName = post_data.filename;
     var LineID = post_data.lineid;
     var CreateDate = post_data.createdate;
     var UpdateDate = post_data.updatedate;
+    var day=dateFormat(new Date(), "dd/mm/yyyy hh:MM TT");
 
     var insertJson = {  
         'ProfileId':ProfileId == undefined?'':ProfileId,
@@ -527,18 +526,14 @@ app.post('/DenOfArtAddProfile',(req,res,next)=> {
         'FirstName':FirstName == undefined?'':FirstName,
         'LastName':LastName == undefined?'':LastName,
         'Gender':Gender == undefined?'':Gender,
-        'Age':Age == undefined?'':Age,
         'DateOfBirth':DateOfBirth == undefined?'':DateOfBirth,
         'Address1':Address1 == undefined?'':Address1,
         'Address2':Address2 == undefined?'':Address2,
         'Address3':Address3 == undefined?'':Address3,
         'Email':Email == undefined?'':Email,
         'PhoneNumber':PhoneNumber == undefined?'':PhoneNumber,
-        'Content':Content == undefined?'':Content,
-        'FileName':FileName == undefined?'':FileName,
         'LineID':LineID == undefined?'':LineID,
-        'CreateDate':CreateDate == undefined?'':CreateDate,
-        'UpdateDate':UpdateDate == undefined?'':UpdateDate
+        'CreateDate':day,
     };
     console.log(insertJson);
     // Get a reference to the database service
@@ -600,7 +595,7 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
     var PhoneNumber = post_data.phonenumber;
     //var Content = post_data.content;
     //var FileName = post_data.filename;
-    //var LineID = post_data.lineid;
+    var LineID = post_data.lineid;
     //var CreateDate = post_data.createdate;
     var UpdateDate = post_data.updatedate;
     /*
@@ -627,7 +622,8 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
     // Get a reference to the database service
     var db = firebase.database();
     var dbRef = db.ref('DenOfArtProfile');
-
+    var day=dateFormat(new Date(), "dd/mm/yyyy hh:MM TT");
+    console.log('date-time:', day);
     dbRef.orderByChild('UserName').equalTo(UserName).once('value', (snapshot)=>{
         var vals = snapshot.val();
         if(vals != null && vals != ''){
@@ -641,17 +637,18 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
                     console.log('user key', k);
                     var dataRef = dbRef.child(k);
                     dataRef.update({
-                        'ProfileId':ProfileId == undefined?'':ProfileId,
-                        'FirstName':FirstName == undefined?'':FirstName,
-                        'LastName':LastName == undefined?'':LastName,
-                        'Gender':Gender == undefined?'':Gender,
-                        'DateOfBirth':DateOfBirth == undefined?'':DateOfBirth,
-                        'Address1':Address1 == undefined?'':Address1,
-                        'Address2':Address2 == undefined?'':Address2,
-                        'Address3':Address3 == undefined?'':Address3,
-                        'Email':Email == undefined?'':Email,
-                        'PhoneNumber':PhoneNumber == undefined?'':PhoneNumber,
-                        'UpdateDate':UpdateDate == undefined?'':UpdateDate
+                        'ProfileId':ProfileId == undefined?vals[k].ProfileId:ProfileId,
+                        'FirstName':FirstName == undefined?vals[k].FirstName:FirstName,
+                        'LastName':LastName == undefined?vals[k].LastName:LastName,
+                        'Gender':Gender == undefined?vals[k].Gender:Gender,
+                        'DateOfBirth':DateOfBirth == undefined?vals[k].DateOfBirth:DateOfBirth,
+                        'Address1':Address1 == undefined?vals[k].Address1:Address1,
+                        'Address2':Address2 == undefined?vals[k].Address2:Address2,
+                        'Address3':Address3 == undefined?vals[k].Address3:Address3,
+                        'Email':Email == undefined?vals[k].Email:Email,
+                        'LineID':LineID == undefined?vals[k].LineID:LineID,
+                        'PhoneNumber':PhoneNumber == undefined?vals[k].PhoneNumber:PhoneNumber,
+                        'UpdateDate':day,
                     });
                     console.log('true');
                     res.send('true');
@@ -692,6 +689,7 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
     var updatedate = post_data.updatedate;//format DateTime# dd/MM/yyyy hh:mm
 
     var isExist = false;
+    var day=dateFormat(new Date(), "dd/mm/yyyy hh:MM TT");
 
     var insertJson = {  
         'UserName':username == undefined?'':username ,
@@ -714,9 +712,10 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
         'CreateBy':createby == undefined?'':createby ,
         'CreateDate':createdate == undefined?'':createdate ,
         'UpdateBy':updateby == undefined?'':updateby ,
-        'UpdateDate':updatedate == undefined?'':updatedate 
+        'UpdateDate':day,
     };
     console.log(insertJson);
+    
     // Get a reference to the database service
     var db = firebase.database();
     var rootRef = db.ref();
@@ -890,23 +889,27 @@ function reply(reply_token) {
 app.post('/LINEPushMessage',(req,res,next)=> { 
     console.log("HTTP POST Request :: LINEPushMessage");
     var reply_token = 'Not need to use token';
+    var post_data = req.body;  
+    var push_message = post_data.message;
+
     console.log(`Message token : ${ reply_token }`);
-    pushMessage(reply_token);
+    pushMessage(reply_token, push_message);
     res.sendStatus(200);
 });
 
-function pushMessage(reply_token) {
+function pushMessage(reply_token, push_message) {
     let headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
     }
 
     let body = JSON.stringify({
-        //to: 'U95d0e01a7247c7e3f167b118cf424f6e',
-        to:'U3408f00a20e28ab3486a8563c2027537',
+        //to: 'U95d0e01a7247c7e3f167b118cf424f6e', //Suwit
+        //to:'U3408f00a20e28ab3486a8563c2027537', //Arm
+        to:'Uda1584fd66bf59c42f4dfddbd11ecb99',//Sai
         messages: [{
             type: 'text',
-            text: '900 บาทครับ'
+            text: push_message
         }]
     })
     request.post({
