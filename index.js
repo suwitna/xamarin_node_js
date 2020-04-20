@@ -586,39 +586,14 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
     var FirstName = post_data.firstname;
     var LastName = post_data.lastname;
     var Gender = post_data.gender;
-    //var Age = post_data.age;
     var DateOfBirth = post_data.dateofbirth;
     var Address1 = post_data.address1;
     var Address2 = post_data.address2;
     var Address3 = post_data.address3;
     var Email = post_data.email;
     var PhoneNumber = post_data.phonenumber;
-    //var Content = post_data.content;
-    //var FileName = post_data.filename;
     var LineID = post_data.lineid;
-    //var CreateDate = post_data.createdate;
-    var UpdateDate = post_data.updatedate;
-    /*
-    var insertJson = {  
-        'ProfileId':ProfileId == undefined?'':ProfileId,
-        'UserName':UserName == undefined?'':UserName,
-        'FirstName':FirstName == undefined?'':FirstName,
-        'LastName':LastName == undefined?'':LastName,
-        'Gender':Gender == undefined?'':Gender,
-        'Age':Age == undefined?'':Age,
-        'DateOfBirth':DateOfBirth == undefined?'':DateOfBirth,
-        'Address1':Address1 == undefined?'':Address1,
-        'Address2':Address2 == undefined?'':Address2,
-        'Address3':Address3 == undefined?'':Address3,
-        'Email':Email == undefined?'':Email,
-        'PhoneNumber':PhoneNumber == undefined?'':PhoneNumber,
-        'Content':Content == undefined?'':Content,
-        'FileName':FileName == undefined?'':FileName,
-        'LineID':LineID == undefined?'':LineID,
-        'CreateDate':CreateDate == undefined?'':CreateDate,
-        'UpdateDate':UpdateDate == undefined?'':UpdateDate
-    };
-    */
+
     // Get a reference to the database service
     var db = firebase.database();
     var dbRef = db.ref('DenOfArtProfile');
@@ -650,7 +625,20 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
                         'PhoneNumber':PhoneNumber == undefined?vals[k].PhoneNumber:PhoneNumber,
                         'UpdateDate':day,
                     });
-                    console.log('true');
+                    console.log({
+                        'ProfileId':ProfileId == undefined?vals[k].ProfileId:ProfileId,
+                        'FirstName':FirstName == undefined?vals[k].FirstName:FirstName,
+                        'LastName':LastName == undefined?vals[k].LastName:LastName,
+                        'Gender':Gender == undefined?vals[k].Gender:Gender,
+                        'DateOfBirth':DateOfBirth == undefined?vals[k].DateOfBirth:DateOfBirth,
+                        'Address1':Address1 == undefined?vals[k].Address1:Address1,
+                        'Address2':Address2 == undefined?vals[k].Address2:Address2,
+                        'Address3':Address3 == undefined?vals[k].Address3:Address3,
+                        'Email':Email == undefined?vals[k].Email:Email,
+                        'LineID':LineID == undefined?vals[k].LineID:LineID,
+                        'PhoneNumber':PhoneNumber == undefined?vals[k].PhoneNumber:PhoneNumber,
+                        'UpdateDate':day,
+                    });
                     res.send('true');
                     return;
                 }
@@ -663,7 +651,7 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
     
 });
 
-app.post('/DenOfArtCreatAppointment',(req,res,next)=> { 
+app.post('/DenOfArtAddAppointment',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Add Appointment");
     var post_data = req.body;  
     var username = post_data.username;
@@ -682,11 +670,11 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
     var iscancel = post_data.iscancel;//Y or ''
     var cancelreason = post_data.cancelreason;
     var ispostpone = post_data.ispostpone;//Y or ''
+    var postponedate = post_data.postponedate;//format DateTime# dd/MM/yyyy
+    var postponetime = post_data.postponetime;//format DateTime# hh:mm
     var postponereason = post_data.postponereason;
     var createby = post_data.createby;
-    var createdate = post_data.createdate;//format DateTime# dd/MM/yyyy hh:mm
     var updateby = post_data.updateby;
-    var updatedate = post_data.updatedate;//format DateTime# dd/MM/yyyy hh:mm
 
     var isExist = false;
     var day=dateFormat(new Date(), "dd/mm/yyyy hh:MM TT");
@@ -708,9 +696,11 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
         'IsCancel':iscancel == undefined?'':iscancel ,
         'CancelReason':cancelreason == undefined?'':cancelreason ,
         'IsPostpone':ispostpone == undefined?'':ispostpone ,
+        'PostponeDate':postponedate == undefined?'':postponedate ,
+        'PostponeTime':postponetime == undefined?'':postponetime ,
         'PostponeReason':postponereason == undefined?'':postponereason ,
         'CreateBy':createby == undefined?'':createby ,
-        'CreateDate':createdate == undefined?'':createdate ,
+        'CreateDate':day ,
         'UpdateBy':updateby == undefined?'':updateby ,
         'UpdateDate':day,
     };
@@ -752,8 +742,8 @@ app.post('/DenOfArtCreatAppointment',(req,res,next)=> {
     });
 });
 
-app.post('/DenOfArtGetAppointment',(req,res,next)=> { 
-    console.log("HTTP POST Request :: Den of Art Get Appointment");
+app.post('/DenOfArtGetAllAppointment',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Get All Appointment of Customer");
     var jsonObj = {Data:[]};
     var post_data = req.body;  
   
@@ -776,6 +766,169 @@ app.post('/DenOfArtGetAppointment',(req,res,next)=> {
         }
         res.json(jsonObj);
     });
+});
+
+app.post('/DenOfArtExistAppointment',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Check Appointment by date/time");
+    var post_data = req.body;
+    if(Object.keys(post_data).length === 0){
+        console.log('No data found');
+        res.send(false);
+        return;
+    }
+
+    //Get parameters
+    var post_data = req.body;  
+    var UserName = post_data.username;
+    var AppointmentDate = post_data.appointmentdate;//format DateTime# dd/MM/yyyy
+    var AppointmentTime = post_data.appointmenttime;//format DateTime# hh:mm
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtAppointment');
+    var day = dateFormat(new Date(), "dd/mm/yyyy hh:MM TT");
+
+    console.log('date-time:', day);
+    dbRef.orderByChild('UserName').equalTo(UserName).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var updateUserName = vals[k].UserName;
+                var updateAppointmentDate = vals[k].AppointmentDate;
+                var updateAppointmentTime = vals[k].AppointmentTime;
+
+                console.log('Appointment Infomation');
+                console.log('User Name:', UserName);
+                console.log('Appointment Date:', AppointmentDate);
+                console.log('Appointment Time:', AppointmentTime);
+
+                if((UserName == updateUserName) && (AppointmentDate == updateAppointmentDate)  && (AppointmentTime == updateAppointmentTime)){
+                    console.log('true');
+                    res.send('true');
+                    return;
+                }
+            }
+        }
+        console.log('false');
+        res.send('false');
+        return;
+    });
+    
+});
+
+app.post('/DenOfArtUpdateAppointment',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Update Appointment");
+    var post_data = req.body;
+    if(Object.keys(post_data).length === 0){
+        console.log('No data found');
+        res.send(false);
+        return;
+    }
+
+    //Get parameters
+    var post_data = req.body;  
+    var UserName = post_data.username;
+    var HN = post_data.hn;
+    var CustomerName = post_data.customername;
+    var Subject = post_data.subject;
+    var AppointmentDate = post_data.appointmentdate;//format DateTime# dd/MM/yyyy
+    var AppointmentTime = post_data.appointmenttime;//format DateTime# hh:mm
+    var Status = post_data.status;
+    var IsApprove = post_data.isapprove;//Y or ''
+    var IsTreat = post_data.istreat;//Y or ''
+    var TreatBy = post_data.treatby;
+    var TreatDetail = post_data.treatdetail;
+    var TreatDate = post_data.treatdate;//format DateTime# dd/MM/yyyy
+    var TreatTime = post_data.treattime;//format DateTime# hh:mm
+    var IsCancel = post_data.iscancel;//Y or ''
+    var CancelReason = post_data.cancelreason;
+    var IsPostpone = post_data.ispostpone;//Y or ''
+    var PostponeDate = post_data.postponedate;//format DateTime# dd/MM/yyyy
+    var PostponeTime = post_data.postponetime;//format DateTime# hh:mm
+    var PostponeReason = post_data.postponereason;
+    var UpdateBy = post_data.updateby;
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtAppointment');
+    var day = dateFormat(new Date(), "dd/mm/yyyy hh:MM TT");
+
+    console.log('date-time:', day);
+    dbRef.orderByChild('UserName').equalTo(UserName).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var updateUserName = vals[k].UserName;
+                var updateAppointmentDate = vals[k].AppointmentDate;
+                var updateAppointmentTime = vals[k].AppointmentTime;
+
+                console.log('Appointment Infomation');
+                console.log('User Name:', UserName);
+                console.log('Appointment Date:', AppointmentDate);
+                console.log('Appointment Time:', AppointmentTime);
+
+                console.log('User Name:', UserName, ', ',updateUserName);
+                if((UserName == updateUserName) && (AppointmentDate == updateAppointmentDate)  && (AppointmentTime == updateAppointmentTime)){
+                    console.log('user key', k);
+                    var dataRef = dbRef.child(k);
+                    dataRef.update({
+                        'HN':HN == undefined?vals[k].HN:HN ,
+                        'CustomerName':CustomerName == undefined?vals[k].CustomerName:CustomerName ,
+                        'Subject':Subject == undefined?vals[k].Subject:Subject ,
+                        'AppointmentDate':AppointmentDate == undefined?vals[k].AppointmentDate:AppointmentDate ,
+                        'AppointmentTime':AppointmentTime == undefined?vals[k].AppointmentTime:AppointmentTime ,
+                        'Status':Status == undefined?vals[k].Status:Status ,
+                        'IsApprove':IsApprove == undefined?vals[k].IsApprove:IsApprove ,
+                        'IsTreat':IsTreat == undefined?vals[k].IsTreat:IsTreat ,
+                        'TreatBy':TreatBy == undefined?vals[k].TreatBy:TreatBy ,
+                        'TreatDetail':TreatDetail == undefined?vals[k].TreatDetail:TreatDetail ,
+                        'TreatDate':TreatDate == undefined?vals[k].TreatDate:TreatDate ,
+                        'TreatTime':TreatTime == undefined?vals[k].TreatTime:TreatTime ,
+                        'IsCancel':IsCancel == undefined?vals[k].IsCancel:IsCancel ,
+                        'CancelReason':CancelReason == undefined?vals[k].CancelReason:CancelReason ,
+                        'IsPostpone':IsPostpone == undefined?vals[k].IsPostpone:IsPostpone ,
+                        'PostponeDate':PostponeDate == undefined?vals[k].PostponeDate:PostponeDate ,
+                        'PostponeTime':PostponeTime == undefined?vals[k].PostponeTime:PostponeTime ,
+                        'PostponeReason':PostponeReason == undefined?vals[k].PostponeReason:PostponeReason ,
+                        'UpdateBy':UpdateBy == undefined?vals[k].UpdateBy:UpdateBy ,
+                        'UpdateDate':day,
+                    });
+                    console.log({
+                        'HN':HN == undefined?vals[k].HN:HN ,
+                        'CustomerName':CustomerName == undefined?vals[k].CustomerName:CustomerName ,
+                        'Subject':Subject == undefined?vals[k].Subject:Subject ,
+                        'AppointmentDate':AppointmentDate == undefined?vals[k].AppointmentDate:AppointmentDate ,
+                        'AppointmentTime':AppointmentTime == undefined?vals[k].AppointmentTime:AppointmentTime ,
+                        'Status':Status == undefined?vals[k].Status:Status ,
+                        'IsApprove':IsApprove == undefined?vals[k].IsApprove:IsApprove ,
+                        'IsTreat':IsTreat == undefined?vals[k].IsTreat:IsTreat ,
+                        'TreatBy':TreatBy == undefined?vals[k].TreatBy:TreatBy ,
+                        'TreatDetail':TreatDetail == undefined?vals[k].TreatDetail:TreatDetail ,
+                        'TreatDate':TreatDate == undefined?vals[k].TreatDate:TreatDate ,
+                        'TreatTime':TreatTime == undefined?vals[k].TreatTime:TreatTime ,
+                        'IsCancel':IsCancel == undefined?vals[k].IsCancel:IsCancel ,
+                        'CancelReason':CancelReason == undefined?vals[k].CancelReason:CancelReason ,
+                        'IsPostpone':IsPostpone == undefined?vals[k].IsPostpone:IsPostpone ,
+                        'PostponeDate':PostponeDate == undefined?vals[k].PostponeDate:PostponeDate ,
+                        'PostponeTime':PostponeTime == undefined?vals[k].PostponeTime:PostponeTime ,
+                        'PostponeReason':PostponeReason == undefined?vals[k].PostponeReason:PostponeReason ,
+                        'UpdateBy':UpdateBy == undefined?vals[k].UpdateBy:UpdateBy ,
+                        'UpdateDate':day,
+                    });
+                    res.send('true');
+                    return;
+                }
+            }
+        }
+        console.log('false');
+        res.send('false');
+        return;
+    });
+    
 });
 
 app.post('/webhook',(req,res,next)=> { 
