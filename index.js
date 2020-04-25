@@ -724,6 +724,47 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
     
 });
 
+app.post('/DenOfArtFindAppointment',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Check Find Appointment");
+    var post_data = req.body;  
+  
+    var loginname = post_data.username;
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtAppointment');
+    var existUser = false;
+
+    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        console.log('vals:', vals);
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            var obj = {};
+            var i = 0;
+            console.log('keys.length:', keys.length);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var user = vals[k].UserName;
+                
+                if(loginname == user){
+                    obj[k] = vals[k];
+                    existUser = true;
+                }
+            }
+            if(existUser)
+            {
+                res.json(obj);
+                return;
+            }
+        }
+
+        console.log('Appointment not found');
+        res.send('Appointment not found');
+        return;
+    });
+});
+
 app.post('/DenOfArtAddAppointment',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Add Appointment");
     var post_data = req.body;  
