@@ -510,6 +510,43 @@ app.post('/DenOfArtChangePassword',(req,res,next)=> {
     
 });
 
+app.post('/DenOfArtFindProfile',(req,res,next)=> { 
+    console.log("HTTP POST Request :: Den of Art Check Find Profile");
+    var post_data = req.body;  
+  
+    var loginname = post_data.username;
+
+    // Get a reference to the database service
+    var db = firebase.database();
+    var dbRef = db.ref('DenOfArtProfile');
+    var existUser = false;
+
+    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        console.log('vals:', vals);
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            var obj = {};
+            var i = 0;
+            console.log('keys.length:', keys.length);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var user = vals[k].UserName;
+                
+                if(loginname == user){
+                    obj[k] = vals[k];
+                    res.json(vals[k]);
+                    return;
+                }
+            }
+        }
+
+        console.log('User profile not found');
+        res.send('User profile not found');
+        return;
+    });
+});
+
 app.post('/DenOfArtGetProfile',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art Get Profile");
     var jsonObj = {Data:[]};
