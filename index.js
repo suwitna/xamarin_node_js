@@ -276,30 +276,52 @@ app.post('/DenOfArtFindUser',(req,res,next)=> {
     var db = firebase.database();
     var dbRef = db.ref('DenOfArtUser');
     var existUser = false;
+    console.log('Login Name:', loginname);
 
-    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
-        var vals = snapshot.val();
-        console.log('vals:', vals);
-        if(vals != null && vals != ''){
-            var keys = Object.keys(vals);
-            var obj = {};
-            console.log('keys.length:', keys.length);
-            for(var i=0; i<keys.length; i++){
-                var k = keys[i];
-                var user = vals[k].UserName;
-                
-                if(loginname == user){
-                    obj[k] = vals[k];
-                    res.json(vals[k]);
-                    return;
+    if (loginname == undefined || loginname == null || loginname == ''){
+        console.log('Not found any payload information');
+        res.send('Not found any payload information');
+        return;
+    }
+
+    if (loginname.trim().toUpperCase() != 'ALL' ){
+        dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+            var vals = snapshot.val();
+            if(vals != null && vals != ''){
+                var keys = Object.keys(vals);
+                var obj = {};
+                console.log('keys.length:', keys.length);
+                for(var i=0; i<keys.length; i++){
+                    var k = keys[i];
+                    var user = vals[k].UserName;
+                    
+                    if(loginname == user){
+                        obj[k] = vals[k];
+                        res.json(vals[k]);
+                        return;
+                    }
                 }
             }
-        }
 
-        console.log('User not found');
-        res.send('User not found');
-        return;
-    });
+            console.log('User not found');
+            res.send('User not found');
+            return;
+        });
+    }
+    else{
+        dbRef.orderByChild('UserName').once('value', (snapshot)=>{
+            var vals = snapshot.val();
+            if(vals != null && vals != ''){
+                console.log(vals);
+                res.json(vals);
+                return;
+            }
+
+            console.log('No data avaiable in user table');
+            res.send('No data avaiable in user table');
+            return;
+        });
+    }
 });
 
 app.post('/DenOfArtGetUserData',(req,res,next)=> { 
