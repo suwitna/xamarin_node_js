@@ -82,18 +82,6 @@ else
 });  
 }  
 // Set the configuration for your app
-// TODO: Replace with your project's config object
-//Suwit
-/*
-var config = {
-    apiKey: "AIzaSyAmg4vqvEq_Yx89rMemZGOO9R1p4nL6mOw",
-    authDomain: "maplocation-4b2a1.firebaseapp.com",
-    databaseURL: "https://maplocation-4b2a1.firebaseio.com",
-    //projectId: "maplocation-4b2a1",
-    storageBucket: "maplocation-4b2a1.appspot.com"
-    //messagingSenderId: "141744972127"
-};
-*/
 //Arm
 var config = {
     apiKey: "AIzaSyAPMyOHvRT0kK_PEVZtoZRZl_pcjcRLc_M",
@@ -105,91 +93,6 @@ var config = {
 };
 
 firebase.initializeApp(config);
-
-//Register   
-app.post('/register',(req,res,next)=>  
-{  
-    var post_data = req.body;  
-
-    var plain_password = post_data.password;  
-    var hash_data = saltHashPassword(plain_password);  
-
-    var password = hash_data.passwordHash;  
-
-    var name = post_data.name;  
-    var email = post_data.email;  
-
-    var insertJson = {  
-        'name':name,  
-        'email': email,  
-        'password': password
-    }; 
-    console.log('User Registeration Successful..');  
-    res.json('User Registeration Successful..');  
-    /*
-    var db = client.db('ahsannodejs');  
-
-    //Check Already Exist Email  
-    db.collection('user').find({'email':email}).count(function(err,number){  
-        if(number != 0){  
-            console.log('User Email already exist!');  
-            res.json('User Email already exist!');  
-        }else{  
-            //Insert data  
-            db.collection('user').insertOne(insertJson,function(err,res){  
-                console.log('User Registeration Successful..');  
-                res.json('User Registeration Successful..');  
-            });  
-        }  
-    });  
-    */
-});  
-  
-//Login  
-app.post('/login',(req,res,next)=>  
-{  
-    var post_data = req.body;  
-
-    var email = post_data.email;  
-    var userPassword = post_data.password;
-    console.log(email); 
-    console.log(userPassword); 
-    /*
-    var db = client.db('ahsannodejs');  
-    
-    //Check Already Exist Email  
-    db.collection('user').find({'email':email}).count(function(err,number){  
-        if(number == 0){  
-            console.log('User Email not exist!');  
-            res.json('User Email not exist!');  
-        }else{  
-            //Insert data  
-            db.collection('user').findOne({'email':email},function(err,user)  
-            {  
-                var salt = user.salt;  
-                var hashed_password = checkHashPassword(userPassword,salt).passwordHash; //Hash Password with Salt  
-                var encrypted_password = user.password; //Get Password from user  
-                if(hashed_password == encrypted_password)  
-                {  
-                    console.log('User Login Successful..');  
-                    res.json('User Login Successful..');  
-                }else  
-                {  
-                    console.log('Login Failed Wrong Password..');  
-                    res.json('Login Failed Wrong Password..');  
-                }  
-            });  
-        }  
-    });  
-    */
-    console.log('User Login Successful..');  
-    res.json('User Login Successful..');  
-});  
-
-//}
-//);  
-
-
 app.post('/firebase',(req,res,next)=> { 
     console.log("HTTP Get Request :: Firebase");
     var post_data = req.body;  
@@ -218,24 +121,7 @@ app.post('/firebase',(req,res,next)=> {
             }
         }
         res.json(jsonObj);
-        //console.log(snapshot.val());
-        //res.json(snapshot.val());
-    });
-    /*
-    var ref = firebase.database().ref("MapTracking");
-    
-    //Attach an asynchronous callback to read the data
-    ref.on("value",
-        function(snapshot) {
-            console.log(snapshot.val());
-            res.json(snapshot.val());
-            ref.off("value");
-        }, 
-        function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-            res.send("The read failed: " + errorObject.code);
-        });
-       */ 
+    }); 
 });
 
 app.post('/DenOfArtUserExist',(req,res,next)=> { 
@@ -1101,70 +987,6 @@ app.post('/webhook',(req,res,next)=> {
     }
     reply(reply_token);
     res.sendStatus(200);
-    //var replyToken = req.body.events[0].replyToken;
-    //var msg = req.body.events[0].message.text;
-    
-    //console.log(`Message token : ${ replyToken }`);
-    //console.log(`Message from chat : ${ msg }`);
-
-    /*
-    res.json({
-        status: 200,
-        message: `Webhook is working!`
-    });
-    */
-    /*
-    //var reply_token = req.body.events[0].replyToken
-    var headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
-    }
-    var body = {
-        status: 200,
-        messages: 'Test',
-        USER: 'suvit2599'
-        
-    };
-
-    res.json({
-        url: 'https://notify-api.line.me/api/status',
-        headers: headers,
-        message: body
-    });
-    */
-    //Custom Header pass
-    /*
-
-    var headersOpt = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {6P5TzfMs7eu/RHrY1vQzjU/Zn4+Z0BgN6vM7uNZN/ED/TWV0rReqn4GAzkEV64LNFvS3gXiEVSldCQZUZ76nQArk8mqqsLZYt2tDItvjaACADcNPEGm8jtZ5ZzbQUG2SLKirsfVJzpkj3Ak5B+P/ygdB04t89/1O/w1cDnyilFU=}'
-    };
-
-    var body = {
-        status: 200,
-        messages: 'Test',
-        USER: 'suvit2599'
-        
-    };
-
-    var options = {
-        url: 'https://notify-api.line.me/api/status',
-        method: 'POST',
-        headers: headersOpt,
-        body : body
-      }
-
-    var req = https.req(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
-      });
-      
-      req.on('error', error => {
-        console.error(error)
-      });
-
-
-    res.sendStatus(200);
-    */
 });
 
 function reply(reply_token) {
