@@ -335,10 +335,11 @@ app.post('/DenOfArtRegister',(req,res,next)=> {
 app.post('/DenOfArtLogin',(req,res,next)=> { 
     console.log("HTTP POST Request :: Den of Art User Login");
     var post_data = req.body;
+    var obj = {};
 
     if(Object.keys(post_data).length === 0){
         console.log('Not found username and password parameters');
-        res.send(false);
+        res.json(obj);
         return;
     }
     
@@ -347,7 +348,7 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
 
     if (loginname == undefined || loginpassword == undefined){
         console.log('Username and password can not empty!');
-        res.send(false);
+        res.json(obj);
         return;
     }
 
@@ -355,7 +356,7 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
     var db = firebase.database();
     var dbRef = db.ref('DenOfArtUser');
     var existUser = false;
-
+    /*
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
         if(vals !=null && vals !=''){
@@ -379,6 +380,40 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
             console.log(existUser);
             res.send(existUser);
         }
+    });
+    */
+   dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
+        var vals = snapshot.val();
+        if(vals != null && vals != ''){
+            var keys = Object.keys(vals);
+            
+            console.log('keys.length:', keys.length);
+            for(var i=0; i<keys.length; i++){
+                var k = keys[i];
+                var password = vals[k].Password;
+                
+                if(encrypt(loginpassword) == password){
+                    existUser = true;
+                    obj[k] = vals[k];
+                    console.log({
+                        'Email': vals[k].Email,
+                        'Password': vals[k].Password,
+                        'PhoneNumber': vals[k].PhoneNumber,
+                        'UserName': vals[k].UserName
+                    });
+                    res.json({
+                        'Email': vals[k].Email,
+                        'Password': vals[k].Password,
+                        'PhoneNumber': vals[k].PhoneNumber,
+                        'UserName': vals[k].UserName
+                    });
+                    return;
+                }
+            }
+        }
+
+        console.log(obj);
+        res.json(obj);
     });
 });
 
