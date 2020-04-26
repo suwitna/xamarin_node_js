@@ -83,6 +83,8 @@ else
 }  
 // Set the configuration for your app
 // TODO: Replace with your project's config object
+//Suwit
+/*
 var config = {
     apiKey: "AIzaSyAmg4vqvEq_Yx89rMemZGOO9R1p4nL6mOw",
     authDomain: "maplocation-4b2a1.firebaseapp.com",
@@ -90,6 +92,16 @@ var config = {
     //projectId: "maplocation-4b2a1",
     storageBucket: "maplocation-4b2a1.appspot.com"
     //messagingSenderId: "141744972127"
+};
+*/
+//Arm
+var config = {
+    apiKey: "AIzaSyAPMyOHvRT0kK_PEVZtoZRZl_pcjcRLc_M",
+    authDomain: "denofart-e2105.firebaseapp.com",
+    databaseURL: "https://denofart-e2105.firebaseio.com",
+    //projectId: "denofart-e2105",
+    storageBucket: "denofart-e2105.appspot.com"
+    //messagingSenderId: "782956333810"
 };
 
 firebase.initializeApp(config);
