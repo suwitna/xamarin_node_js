@@ -237,6 +237,12 @@ app.post('/DenOfArtUserExist',(req,res,next)=> {
     var dbRef = db.ref('DenOfArtUser');
     var existUser = false;
 
+    if (loginname == undefined || loginname == null || loginname == '' || loginname.trim().toUpperCase() == 'ALL'){
+        console.log('Username is not blank or ALL');
+        res.send(existUser);
+        return;
+    }
+
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
         console.log('vals:', vals);
