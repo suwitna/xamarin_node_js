@@ -356,7 +356,7 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
     var db = firebase.database();
     var dbRef = db.ref('DenOfArtUser');
     var existUser = false;
-    /*
+    
     dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
         if(vals !=null && vals !=''){
@@ -381,7 +381,8 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
             res.send(existUser);
         }
     });
-    */
+    
+   /*
    dbRef.orderByChild('UserName').equalTo(loginname).once('value', (snapshot)=>{
         var vals = snapshot.val();
         if(vals != null && vals != ''){
@@ -415,6 +416,7 @@ app.post('/DenOfArtLogin',(req,res,next)=> {
         console.log(obj);
         res.json(obj);
     });
+    */
 });
 
 app.post('/DenOfArtChangePassword',(req,res,next)=> { 
