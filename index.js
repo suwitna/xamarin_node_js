@@ -337,6 +337,9 @@ app.post('/DenOfArtRegister',(req,res,next)=> {
         var userRef = usersRef.push();
         console.log('user key', userRef.key);
         dbRef.push(userRef.key).set(insertJson);
+        //MySql
+        RegisterMySql(name, password, email, mobile);
+        //End
         console.log(insertJson);
         res.send(insertJson);
         return;
@@ -686,6 +689,14 @@ app.post('/DenOfArtUpdateProfile',(req,res,next)=> {
                         'PhoneNumber':PhoneNumber == undefined?vals[k].PhoneNumber:PhoneNumber,
                         'UpdateDate':day,
                     });
+                    UpdateProfileMySql(
+                        UserName, 
+                        FirstName == undefined?vals[k].FirstName:FirstName, 
+                        LastName == undefined?vals[k].LastName:LastName, 
+                        Address1 == undefined?vals[k].Address1:Address1, 
+                        Address2 == undefined?vals[k].Address2:Address2, 
+                        Address3 == undefined?vals[k].Address3:Address3
+                        );
                     res.send('true');
                     return;
                 }
@@ -1180,3 +1191,30 @@ app.post('/DenOfArtMySqlUpdateProfile',(req,res,next)=> {
 
     res.sendStatus(200);
 });
+
+function RegisterMySql(name, password, email, mobile){
+    console.log("Function :: Den of Art User Register on MySql");
+    var sql = "INSERT INTO users (username, password, email, phone) VALUES ?";
+    var values = [
+        [name, password, email, mobile]
+    ];
+
+    mysql_con.query(sql, [values], function (err, result) {
+        if (err) throw err;
+        console.log("Number of records inserted: " + result.affectedRows);
+        
+    });
+    return;
+}
+
+function UpdateProfileMySql(username, firstname, lastname, address1, address2, address3){
+    console.log("Function :: Den of Art Update User Profile on MySql");
+    var sql = "UPDATE users SET firstname = '"+firstname+"', lastname='"+lastname+"', address='"+address1+" "+ address2+" "+address3+"' WHERE username = '"+username+"'";
+    console.log('sql = ' + sql);
+    mysql_con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("Number of records inserted: " + result.affectedRows);
+    });
+
+    return;
+}
