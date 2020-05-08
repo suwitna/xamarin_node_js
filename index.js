@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var firebase = require('firebase');
 const request = require('request');
 var dateFormat = require('dateformat');
+var mysql = require('mysql');
 
 //Password Utils  
 //Create Function to Random Salt  
@@ -93,6 +94,16 @@ var config = {
 };
 
 firebase.initializeApp(config);
+
+//MySql connection initial
+var mysql_con = mysql.createConnection({
+    host: "103.22.183.220",
+    user: "smomscic_doaCode",
+    password: "jG4rti7iw",
+    database: "smomscic_doaCode"
+});
+//End
+
 app.post('/firebase',(req,res,next)=> { 
     console.log("HTTP Get Request :: Firebase");
     var post_data = req.body;  
@@ -1121,4 +1132,51 @@ app.get('/wakeup',(req,res,next)=>
 {  
     console.log('Hey, Heroku wakeup!!!');  
     res.sendStatus(200);
-});  
+});
+
+app.post('/DenOfArtMySqlRegister',(req,res,next)=> {
+    console.log("HTTP POST Request :: Den of Art User Register on MySql");
+    var post_data = req.body;  
+    var name = post_data.username;  
+    var email = post_data.email;
+    
+    var plain_password = post_data.password;  
+    var password = encrypt(plain_password);
+
+    var mobile = post_data.phonenumber; 
+    var isExist = false;
+
+    var sql = "INSERT INTO users (username, password, email, phone) VALUES ?";
+    var values = [
+        [name, password, email, mobile]
+    ];
+
+    mysql_con.query(sql, [values], function (err, result) {
+        if (err) throw err;
+        console.log("Number of records inserted: " + result.affectedRows);
+        
+    });
+    res.sendStatus(200);
+});
+
+app.post('/DenOfArtMySqlUpdateProfile',(req,res,next)=> {
+    console.log("HTTP POST Request :: Den of Art Update User Profile on MySql");
+    var post_data = req.body;
+    var UserName = post_data.username;
+    var FirstName = post_data.firstname;
+    var LastName = post_data.lastname;
+    var Address1 = post_data.address1;
+    var Address2 = post_data.address2;
+    var Address3 = post_data.address3;
+    var Email = post_data.email;
+    var PhoneNumber = post_data.phonenumber;
+
+    var sql = "UPDATE users SET firstname = '"+FirstName+"', lastname='"+LastName+"', address='"+Address1+" "+ Address2+" "+Address3+"' WHERE username = '"+UserName+"'";
+    console.log('sql = ' + sql);
+    mysql_con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("Number of records inserted: " + result.affectedRows);
+    });
+
+    res.sendStatus(200);
+});
