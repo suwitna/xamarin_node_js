@@ -1125,7 +1125,7 @@ function broadcastMessage() {
 
     let body = JSON.stringify({
         messages: [{
-            type: 'text',
+            type: 'text', 
             text: 'ทดสอบการปล่อยข้อมูลไปยังสมาชิกทุกท่าน'
         }]
     })
