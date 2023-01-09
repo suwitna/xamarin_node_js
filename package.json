@@ -16,7 +16,7 @@
     "dateformat": "^3.0.3",
     "express": "^4.17.1",
     "firebase": "^7.14.0",
-    "firebase-admin": "^8.10.0",
+    "firebase-admin": "^11.4.1",
     "mongodb": "^3.5.5",
     "mysql": "^2.18.1",
     "request": "^2.88.2"
